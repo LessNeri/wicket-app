@@ -1,27 +1,20 @@
-# Etapa 1: Construir con Maven + Eclipse Temurin 17
+# Etapa 1: Build
 FROM maven:3.9.6-eclipse-temurin-17 AS build
 WORKDIR /app
 
-# Copiar pom.xml primero (para cache eficiente)
 COPY pom.xml .
 RUN mvn dependency:go-offline
 
-# Copiar código fuente
 COPY src ./src
-
-# Construir aplicación
 RUN mvn clean package -DskipTests
 
-# Etapa 2: Runtime con Eclipse Temurin 17 JRE Alpine (más pequeño)
+# Etapa 2: Runtime
 FROM eclipse-temurin:17-jre-alpine
 WORKDIR /app
 
-# Copiar archivos construidos
-COPY --from=build /app/target/wicket-app.war .
-COPY --from=build /app/target/dependency/webapp-runner.jar .
+COPY --from=build /app/target/wicket-app.war app.war
+COPY --from=build /app/target/dependency/webapp-runner.jar webapp-runner.jar
 
-# Puerto
 EXPOSE 8080
 
-# Comando de ejecución
-CMD ["java", "-jar", "webapp-runner.jar", "wicket-app.war", "--port", "8080"]
+CMD ["sh", "-c", "java $JAVA_OPTS -jar webapp-runner.jar app.war --port $PORT"]
