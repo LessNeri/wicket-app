@@ -1,0 +1,28 @@
+# Archivos de compilación
+target/
+*.class
+*.war
+*.jar
+
+# IDE
+.vscode/
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# Sistema
+.DS_Store
+Thumbs.db
+
+# SQLite
+*.sqlite-journal
+*.sqlite-shm
+*.sqlite-wal
+
+# Archivos temporales
+*.log
+*.tmp
+
+# Render
+.env
