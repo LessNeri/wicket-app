@@ -1,7 +1,5 @@
 # Etapa 1: Construir la aplicación con Maven
-FROM maven:3.8.6-openjdk-17 AS build
-WORKDIR /app
-
+FROM maven:3.8.6-openjdk-11 AS build
 # Copiar archivos de Maven primero (para cache eficiente)
 COPY pom.xml .
 RUN mvn dependency:go-offline
