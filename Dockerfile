@@ -11,7 +11,7 @@ COPY src ./src
 RUN mvn clean package -DskipTests
 
 # Etapa 2: Imagen de ejecución más pequeña
-FROM openjdk:17-jdk-slim
+FROM openjdk:11-jdk-slim
 WORKDIR /app
 
 # Copiar archivos construidos desde la etapa 1
