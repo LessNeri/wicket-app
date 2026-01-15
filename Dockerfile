@@ -1,4 +1,4 @@
-# Etapa 1: Build
+# ===== BUILD STAGE =====
 FROM maven:3.9.6-eclipse-temurin-17 AS build
 WORKDIR /app
 
@@ -8,13 +8,15 @@ RUN mvn dependency:go-offline
 COPY src ./src
 RUN mvn clean package -DskipTests
 
-# Etapa 2: Runtime
+# ===== RUNTIME STAGE =====
 FROM eclipse-temurin:17-jre-alpine
 WORKDIR /app
 
+# Descargar webapp-runner directamente
+ADD https://repo1.maven.org/maven2/com/github/jsimone/webapp-runner/9.0.27.0/webapp-runner-9.0.27.0.jar webapp-runner.jar
+
 COPY --from=build /app/target/wicket-app.war app.war
-COPY --from=build /app/target/dependency/webapp-runner.jar webapp-runner.jar
 
 EXPOSE 8080
 
-CMD ["sh", "-c", "java $JAVA_OPTS -jar webapp-runner.jar app.war --port $PORT"]
+CMD ["java", "-jar", "webapp-runner.jar", "--port", "8080", "app.war"]
