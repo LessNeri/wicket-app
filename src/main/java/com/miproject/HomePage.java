@@ -30,21 +30,23 @@ public class HomePage extends WebPage {
         add(form);
 
         WebMarkupContainer captchaContainer = new WebMarkupContainer("captchaContainer");
-        captchaContainer.setOutputMarkupId(true);
-        captchaContainer.setOutputMarkupPlaceholderTag(true);
-        captchaContainer.setVisible(false);
-        form.add(captchaContainer);
+captchaContainer.setOutputMarkupId(true);
+form.add(captchaContainer);
+
 
         AjaxButton btnCaptcha = new AjaxButton("btnCaptcha", form) {
-            @Override
-            protected void onSubmit(AjaxRequestTarget target) {
-                captchaContainer.setVisible(true);
-                target.add(captchaContainer);
-                target.add(feedback);
-            }
-        };
-        btnCaptcha.setDefaultFormProcessing(false);
-        form.add(btnCaptcha);
+    @Override
+    protected void onSubmit(AjaxRequestTarget target) {
+        target.appendJavaScript(
+            "document.getElementById('" 
+            + captchaContainer.getMarkupId() 
+            + "').style.display='block';"
+        );
+    }
+};
+btnCaptcha.setDefaultFormProcessing(false);
+form.add(btnCaptcha);
+
 
         form.add(new Button("btnInsertar"));
     }
