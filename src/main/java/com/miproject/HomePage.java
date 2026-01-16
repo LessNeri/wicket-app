@@ -13,37 +13,39 @@ public class HomePage extends WebPage {
 
     public HomePage() {
 
-    add(new Label("mensaje", "¡Hola Mundo desde Apache Wicket!"));
-    add(new Label("nombre", "Creado por: Leslie"));
-    add(new FeedbackPanel("feedback"));
+        add(new Label("mensaje", "¡Hola Mundo desde Apache Wicket!"));
+        add(new Label("nombre", "Creado por: Leslie"));
 
-    Form<Void> form = new Form<>("formInsertar") {
-        @Override
-        protected void onSubmit() {
-            DatabaseManager.insertarUsuario("Ana", "García");
-            success("Datos insertados correctamente");
-        }
-    };
-    add(form);
+        FeedbackPanel feedback = new FeedbackPanel("feedback");
+        feedback.setOutputMarkupId(true);
+        add(feedback);
 
-    WebMarkupContainer captchaContainer =
-            new WebMarkupContainer("captchaContainer");
-    captchaContainer.setOutputMarkupId(true);
-    captchaContainer.setOutputMarkupPlaceholderTag(true);
-    captchaContainer.setVisible(false);
-    form.add(captchaContainer);
+        Form<Void> form = new Form<>("formInsertar") {
+            @Override
+            protected void onSubmit() {
+                DatabaseManager.insertarUsuario("Ana", "García");
+                success("Datos insertados correctamente");
+            }
+        };
+        add(form);
 
-    AjaxButton btnCaptcha = new AjaxButton("btnCaptcha", form) {
-        @Override
-        protected void onSubmit(AjaxRequestTarget target) {
-            captchaContainer.setVisible(true);
-            target.add(captchaContainer);
-        }
-    };
-    btnCaptcha.setDefaultFormProcessing(false);
-    form.add(btnCaptcha);
+        WebMarkupContainer captchaContainer = new WebMarkupContainer("captchaContainer");
+        captchaContainer.setOutputMarkupId(true);
+        captchaContainer.setOutputMarkupPlaceholderTag(true);
+        captchaContainer.setVisible(false);
+        form.add(captchaContainer);
 
-    form.add(new Button("btnInsertar"));
-}
+        AjaxButton btnCaptcha = new AjaxButton("btnCaptcha", form) {
+            @Override
+            protected void onSubmit(AjaxRequestTarget target) {
+                captchaContainer.setVisible(true);
+                target.add(captchaContainer);
+                target.add(feedback);
+            }
+        };
+        btnCaptcha.setDefaultFormProcessing(false);
+        form.add(btnCaptcha);
 
+        form.add(new Button("btnInsertar"));
+    }
 }
