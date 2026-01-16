@@ -3,21 +3,21 @@
 <head>
     <meta charset="utf-8">
     <title>Hola Mundo Wicket</title>
-    
-    <!-- Script de hCaptcha -->
+
+    <!-- Script hCaptcha -->
     <script src="https://js.hcaptcha.com/1/api.js" async defer></script>
-    
+
     <style>
         body {
             font-family: Arial;
             text-align: center;
             padding: 50px;
         }
-        
+
         h1 {
             color: #333;
         }
-        
+
         .btn {
             background: #4CAF50;
             color: white;
@@ -26,13 +26,13 @@
             border-radius: 5px;
             cursor: pointer;
             font-size: 16px;
-            margin-top: 20px;
+            margin: 10px;
         }
-        
+
         .btn:hover {
             background: #45a049;
         }
-        
+
         .feedback {
             margin: 20px;
             padding: 10px;
@@ -40,56 +40,40 @@
             display: inline-block;
             min-width: 300px;
         }
-        
-        .feedback-success {
-            background: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
-        
-        .feedback-error {
-            background: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
-        
-        .h-captcha {
-            margin: 20px 0;
-            display: inline-block;
-        }
-        
+
         .captcha-container {
-            margin: 30px 0;
+            margin: 25px 0;
         }
     </style>
 </head>
 <body>
-    <!-- Hola Mundo -->
-    <h1 wicket:id="mensaje">¡Hola Mundo desde Apache Wicket!</h1>
-    <p wicket:id="nombre">Creado por: Leslie</p>
-    
-    <!-- Mensajes -->
-    <div wicket:id="feedback" class="feedback"></div>
-    
-    <!-- Formulario con hCaptcha -->
-    <form wicket:id="formInsertar">
-        
-        <!-- Widget de hCaptcha -->
-        <div class="captcha-container">
-            <div class="h-captcha" 
-                 data-sitekey="d68a0486-cdb2-4b46-869c-361675f82c5e"
-                 data-theme="light">
-            </div>
+
+<h1 wicket:id="mensaje"></h1>
+<p wicket:id="nombre"></p>
+
+<div wicket:id="feedback" class="feedback"></div>
+
+<form wicket:id="formInsertar">
+
+    <!-- Botón mostrar captcha -->
+    <button type="button" class="btn" wicket:id="btnCaptcha">
+        Ir al captcha
+    </button>
+
+    <!-- Captcha oculto -->
+    <div wicket:id="captchaContainer" class="captcha-container">
+        <div class="h-captcha"
+             data-sitekey="d68a0486-cdb2-4b46-869c-361675f82c5e"
+             data-theme="light">
         </div>
-        
-        <!-- Botón -->
-        <button type="submit" class="btn" wicket:id="btnInsertar">
-            Insertar datos
-        </button>
-    </form>
-    
-    <div style="margin-top: 30px; color: #666; font-size: 0.9em;">
-        <p>Nota: Debes completar el captcha antes de insertar datos.</p>
     </div>
+
+    <!-- Botón insertar -->
+    <button type="submit" class="btn" wicket:id="btnInsertar">
+        Insertar datos
+    </button>
+
+</form>
+
 </body>
 </html>
