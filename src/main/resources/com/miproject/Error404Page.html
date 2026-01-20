@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html xmlns:wicket="http://wicket.apache.org">
+<head>
+    <meta charset="utf-8">
+    <title>Error 404</title>
+
+    <style>
+        body {
+            font-family: Arial;
+            text-align: center;
+            padding-top: 80px;
+        }
+
+        .codigo {
+            font-size: 120px;
+            color: red;
+            font-weight: bold;
+        }
+
+        .mensaje {
+            font-size: 28px;
+            margin-bottom: 40px;
+        }
+
+        .btn {
+            padding: 12px 25px;
+            background: #4CAF50;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="codigo" wicket:id="codigo"></div>
+    <div class="mensaje" wicket:id="mensaje"></div>
+
+    <a class="btn" wicket:id="volverHome">
+        Volver al inicio
+    </a>
+
+</body>
+</html>

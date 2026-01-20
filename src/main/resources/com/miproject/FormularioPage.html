@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html xmlns:wicket="http://wicket.apache.org">
+<head>
+    <meta charset="utf-8">
+    <title>Formulario</title>
+
+    <style>
+        body {
+            font-family: Arial;
+            text-align: center;
+            padding: 40px;
+        }
+
+        form {
+            display: inline-block;
+            text-align: left;
+            padding: 25px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+        }
+
+        label {
+            display: block;
+            margin-top: 15px;
+        }
+
+        input {
+            width: 250px;
+            padding: 6px;
+        }
+
+        button {
+            margin-top: 20px;
+            padding: 10px 20px;
+        }
+
+        .feedback {
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+
+<h1 wicket:id="titulo"></h1>
+
+<div wicket:id="feedback" class="feedback"></div>
+
+<form wicket:id="formulario">
+
+    <label>Nombre (solo letras)</label>
+    <input type="text" wicket:id="nombre"/>
+
+    <label>Edad (solo números)</label>
+    <input type="text" wicket:id="edad"/>
+
+    <label>Email</label>
+    <input type="email" wicket:id="email"/>
+
+    <label>Teléfono (10 dígitos)</label>
+    <input type="text" wicket:id="telefono"/>
+
+    <label>Fecha</label>
+    <input type="date" wicket:id="fecha"/>
+
+    <button type="submit" wicket:id="enviar">
+        Enviar
+    </button>
+
+</form>
+
+</body>
+</html>

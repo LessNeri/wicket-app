@@ -8,6 +8,8 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Button;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.panel.FeedbackPanel;
+import org.apache.wicket.markup.html.link.Link;
+
 
 public class HomePage extends WebPage {
 
@@ -49,5 +51,16 @@ form.add(btnCaptcha);
 
 
         form.add(new Button("btnInsertar"));
+
+
+form.add(new Link<Void>("btnIrFormulario") {
+    @Override
+    public void onClick() {
+        setResponsePage(FormularioPage.class);
+    }
+});
+
+
+
     }
 }

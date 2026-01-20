@@ -4,7 +4,6 @@
     <meta charset="utf-8">
     <title>Hola Mundo Wicket</title>
 
-    <!-- Script hCaptcha -->
     <script src="https://js.hcaptcha.com/1/api.js" async defer></script>
 
     <style>
@@ -55,12 +54,10 @@
 
 <form wicket:id="formInsertar">
 
-    <!-- Botón mostrar captcha -->
     <button type="button" class="btn" wicket:id="btnCaptcha">
         Ir al captcha
     </button>
 
-    <!-- Captcha oculto -->
     <div wicket:id="captchaContainer"
      class="captcha-container"
      style="display:none">
@@ -70,10 +67,14 @@
 </div>
 
 
-    <!-- Botón insertar -->
     <button type="submit" class="btn" wicket:id="btnInsertar">
         Insertar datos
     </button>
+    
+<a class="btn" wicket:id="btnIrFormulario">
+    Ir al formulario
+</a>
+
 
 </form>
 

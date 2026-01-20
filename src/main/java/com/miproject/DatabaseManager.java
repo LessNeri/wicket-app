@@ -3,7 +3,6 @@ package com.miproject;
 import java.sql.*;
 
 public class DatabaseManager {
-    // Ruta relativa que funciona en cualquier sistema
     private static final String DB_URL = "jdbc:sqlite:wicketdb.sqlite";
     
     static {
