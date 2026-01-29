@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html xmlns:wicket="http://wicket.apache.org">
+<head>
+    <meta charset="utf-8">
+    <title>Mi Aplicación</title>
+
+    <style>
+        .breadcrumbs {
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+
+        .breadcrumbs a {
+            text-decoration: none;
+            color: #1976D2;
+            margin-right: 5px;
+        }
+
+        .breadcrumbs a::after {
+            content: " / ";
+        }
+
+        .breadcrumbs a:last-child::after {
+            content: "";
+        }
+    </style>
+</head>
+<body>
+
+<div class="breadcrumbs">
+    <span wicket:id="breadcrumbs">
+        <a wicket:id="link">
+            <span wicket:id="label"></span>
+        </a>
+    </span>
+</div>
+
+<wicket:child/>
+
+</body>
+</html>

@@ -196,7 +196,7 @@
     </script>
 </head>
 <body>
-
+<wicket:extend> 
 <h1 wicket:id="titulo"></h1>
 
 <div wicket:id="feedback" class="feedback"></div>
@@ -267,6 +267,6 @@
         document.getElementById('contador-telefono').textContent = e.target.value.length + '/10';
     });
 </script>
-
+</wicket:extend>
 </body>
 </html>

@@ -5,7 +5,6 @@ import java.util.List;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
-import org.apache.wicket.markup.html.WebPage;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.TextField;
@@ -24,14 +23,20 @@ import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.util.lang.Bytes;
 import org.apache.wicket.validation.validator.EmailAddressValidator;
 
-public class FormularioPage extends WebPage {
+public class FormularioPage extends BasePage {
 
-    private List<FileUpload> uploads = new java.util.ArrayList<>();
+     private List<FileUpload> uploads = new java.util.ArrayList<>();
     private TextField<String> nombreField;
     private TextField<String> telefonoField;
     private EmailTextField emailField;
     
     public FormularioPage() {
+        // AGREGADO: Breadcrumbs para esta página
+        super(java.util.List.of(
+            new BreadcrumbItem("Inicio", HomePage.class),
+            new BreadcrumbItem("Inserción de datos", InsertarDatosPage.class),
+            new BreadcrumbItem("Formulario", FormularioPage.class)
+        ));
 
         add(new Label("titulo", "Formulario de Validaciones"));
 

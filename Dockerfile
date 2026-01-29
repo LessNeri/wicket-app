@@ -10,6 +10,10 @@ RUN mvn clean package -DskipTests
 FROM eclipse-temurin:17-jre-alpine
 WORKDIR /app
 
+ENV UPLOAD_DIR=/app/uploads
+
+RUN mkdir -p /app/uploads
+
 ADD https://repo1.maven.org/maven2/com/github/jsimone/webapp-runner/9.0.27.0/webapp-runner-9.0.27.0.jar webapp-runner.jar
 
 COPY --from=build /app/target/wicket-app.war app.war

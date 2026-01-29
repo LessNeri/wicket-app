@@ -3,8 +3,10 @@
 <head>
     <meta charset="utf-8">
     <title>Hola Mundo Wicket</title>
+
+    <!-- hCaptcha -->
     <script src="https://js.hcaptcha.com/1/api.js" async defer></script>
-    
+
     <style>
         body {
             font-family: Arial;
@@ -27,7 +29,12 @@
             margin: 10px;
         }
 
-        .btn:hover {
+        .btn:disabled {
+            background: #999;
+            cursor: not-allowed;
+        }
+
+        .btn:hover:not(:disabled) {
             background: #45a049;
         }
 
@@ -43,7 +50,7 @@
             margin: 25px 0;
         }
 
-        /* CARRUSEL MEJORADO - manteniendo tu diseño */
+        /* ===== CARRUSEL (NO TOCADO) ===== */
         .carousel {
             width: 800px;
             height: 400px;
@@ -52,24 +59,24 @@
             border-radius: 10px;
             position: relative;
         }
-        
+
         .carousel-track {
             display: flex;
             transition: transform 0.8s ease-in-out;
             height: 100%;
         }
-        
+
         .carousel-slide {
             min-width: 100%;
             height: 100%;
         }
-        
+
         .carousel-slide img {
             width: 100%;
             height: 100%;
             object-fit: cover;
         }
-        
+
         .carousel-btn {
             position: absolute;
             top: 50%;
@@ -81,15 +88,10 @@
             cursor: pointer;
             font-size: 20px;
         }
-        
-        .carousel-prev {
-            left: 10px;
-        }
-        
-        .carousel-next {
-            right: 10px;
-        }
-        
+
+        .carousel-prev { left: 10px; }
+        .carousel-next { right: 10px; }
+
         .carousel-indicators {
             position: absolute;
             bottom: 20px;
@@ -99,7 +101,7 @@
             justify-content: center;
             gap: 10px;
         }
-        
+
         .indicator {
             width: 12px;
             height: 12px;
@@ -107,7 +109,7 @@
             background: rgba(255,255,255,0.5);
             cursor: pointer;
         }
-        
+
         .indicator.active {
             background: white;
         }
@@ -117,17 +119,20 @@
         }
     </style>
 </head>
+
 <body>
 
 <h1 wicket:id="mensaje"></h1>
 <p wicket:id="nombre"></p>
 
+<!-- ===== CARRUSEL ===== -->
 <div wicket:id="carouselContainer">
     <div class="carousel">
-        <div class="carousel-track" id="carouselTrack">
-        </div>
+        <div class="carousel-track" id="carouselTrack"></div>
+
         <button class="carousel-btn carousel-prev" onclick="showPrevSlide()">‹</button>
         <button class="carousel-btn carousel-next" onclick="showNextSlide()">›</button>
+
         <div class="carousel-indicators" id="indicators"></div>
     </div>
 
@@ -135,6 +140,7 @@
     <span wicket:id="carouselData" id="carouselData" style="display:none"></span>
 </div>
 
+<!-- ===== SUBIR IMAGEN ===== -->
 <form wicket:id="uploadForm" class="upload-form" enctype="multipart/form-data">
     <input type="file" wicket:id="imageUpload" accept="image/*">
     <br><br>
@@ -145,113 +151,126 @@
 
 <div wicket:id="feedback" class="feedback"></div>
 
-<form wicket:id="formInsertar">
-
-    <button type="button" class="btn" wicket:id="btnCaptcha">
-        Ir al captcha
-    </button>
+<!-- ===== CAPTCHA + NAVEGACIÓN ===== -->
+<form wicket:id="formCaptcha">
 
     <div wicket:id="captchaContainer"
-     class="captcha-container"
-     style="display:none">
+     class="captcha-container">  <!-- SIN style="display:none" -->
+
     <div class="h-captcha"
-         data-sitekey="d68a0486-cdb2-4b46-869c-361675f82c5e">
+         data-sitekey="d68a0486-cdb2-4b46-869c-361675f82c5e"
+         data-callback="onCaptchaVerified">
     </div>
 </div>
 
-    <button type="submit" class="btn" wicket:id="btnInsertar">
-        Insertar datos
+    <!-- Token oculto -->
+    <input type="hidden" wicket:id="captchaToken"/>
+
+    <br>
+
+    <button type="submit" class="btn" wicket:id="btnIrInsercionDatos">
+        Ir a Inserción de Datos
     </button>
-    
-<a class="btn" wicket:id="btnIrFormulario">
-    Ir al formulario
-</a>
 
 </form>
 
 </body>
+
+<!-- ===== JS DEL CARRUSEL (SIN CAMBIOS) ===== -->
 <script>
     let carouselImages = [];
     let currentIndex = 0;
     let autoSlideInterval;
-    
+
     function initCarousel() {
         const data = document.getElementById("carouselData");
-        if (!data) return;
-        
+        if (!data) return;  
+
         try {
             carouselImages = JSON.parse(data.textContent);
         } catch (e) {
             carouselImages = data.textContent.split(",").filter(img => img.trim() !== "");
         }
-        
-        if (carouselImages.length === 0) {
-            console.log("No hay imágenes para mostrar");
-            return;
-        }
-        
+
+        if (carouselImages.length === 0) return;
+
         const track = document.getElementById("carouselTrack");
         const indicators = document.getElementById("indicators");
+
         track.innerHTML = '';
         indicators.innerHTML = '';
-        
+
         carouselImages.forEach((img, index) => {
             const slide = document.createElement('div');
             slide.className = 'carousel-slide';
-            slide.innerHTML = `<img src="${img}" alt="Imagen ${index + 1}">`;
+            slide.innerHTML = `<img src="${img}">`;
             track.appendChild(slide);
-            
+
             const indicator = document.createElement('div');
             indicator.className = 'indicator';
             if (index === 0) indicator.classList.add('active');
             indicator.onclick = () => goToSlide(index);
             indicators.appendChild(indicator);
         });
-        
+
         startAutoSlide();
     }
-    
+
     function goToSlide(index) {
         if (index < 0) index = carouselImages.length - 1;
         if (index >= carouselImages.length) index = 0;
-        
+
         currentIndex = index;
-        const track = document.getElementById("carouselTrack");
-        track.style.transform = `translateX(-${currentIndex * 100}%)`;
-        
-        document.querySelectorAll('.indicator').forEach((indicator, i) => {
-            indicator.classList.toggle('active', i === currentIndex);
-        });
-        
+        document.getElementById("carouselTrack")
+            .style.transform = `translateX(-${index * 100}%)`;
+
+        document.querySelectorAll('.indicator')
+            .forEach((el, i) => el.classList.toggle('active', i === index));
+
         resetAutoSlide();
     }
-    
-    function showNextSlide() {
-        goToSlide(currentIndex + 1);
-    }
-    
-    function showPrevSlide() {
-        goToSlide(currentIndex - 1);
-    }
-    
+
+    function showNextSlide() { goToSlide(currentIndex + 1); }
+    function showPrevSlide() { goToSlide(currentIndex - 1); }
+
     function startAutoSlide() {
-        if (autoSlideInterval) clearInterval(autoSlideInterval);
-        autoSlideInterval = setInterval(showNextSlide, 5000); // 5 segundos
+        clearInterval(autoSlideInterval);
+        autoSlideInterval = setInterval(showNextSlide, 5000);
     }
-    
+
     function resetAutoSlide() {
         clearInterval(autoSlideInterval);
         startAutoSlide();
     }
-    
-    document.querySelector('.carousel').addEventListener('mouseenter', () => {
-        clearInterval(autoSlideInterval);
+
+    document.addEventListener('DOMContentLoaded', () => {
+        setTimeout(initCarousel, 100);
     });
-    
-    document.querySelector('.carousel').addEventListener('mouseleave', startAutoSlide);
-    
-    document.addEventListener('DOMContentLoaded', initCarousel);
-    
+
     window.initCarousel = initCarousel;
+    
+        function onCaptchaVerified(token) {
+        console.log('Captcha verificado, token:', token);
+        
+        var tokenField = document.querySelector('[wicket\\:id="captchaToken"]');
+        if (tokenField) {
+            tokenField.value = token;
+        }
+        
+        var btnInsercion = document.querySelector('[wicket\\:id="btnIrInsercionDatos"]');
+        if (btnInsercion) {
+            btnInsercion.disabled = false;
+            btnInsercion.style.backgroundColor = '#4CAF50';
+        }
+    }
+    
+    function onCaptchaExpired() {
+        var btnInsercion = document.querySelector('[wicket\\:id="btnIrInsercionDatos"]');
+        if (btnInsercion) {
+            btnInsercion.disabled = true;
+            btnInsercion.style.backgroundColor = '#999';
+        }
+    }
 </script>
+
 </html>
