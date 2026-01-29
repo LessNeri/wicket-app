@@ -3,9 +3,8 @@
 <head>
     <meta charset="utf-8">
     <title>Hola Mundo Wicket</title>
-
     <script src="https://js.hcaptcha.com/1/api.js" async defer></script>
-
+    
     <style>
         body {
             font-family: Arial;
@@ -43,12 +42,106 @@
         .captcha-container {
             margin: 25px 0;
         }
+
+        /* CARRUSEL MEJORADO - manteniendo tu diseño */
+        .carousel {
+            width: 800px;
+            height: 400px;
+            margin: 30px auto;
+            overflow: hidden;
+            border-radius: 10px;
+            position: relative;
+        }
+        
+        .carousel-track {
+            display: flex;
+            transition: transform 0.8s ease-in-out;
+            height: 100%;
+        }
+        
+        .carousel-slide {
+            min-width: 100%;
+            height: 100%;
+        }
+        
+        .carousel-slide img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .carousel-btn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(0,0,0,0.5);
+            color: white;
+            border: none;
+            padding: 15px;
+            cursor: pointer;
+            font-size: 20px;
+        }
+        
+        .carousel-prev {
+            left: 10px;
+        }
+        
+        .carousel-next {
+            right: 10px;
+        }
+        
+        .carousel-indicators {
+            position: absolute;
+            bottom: 20px;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.5);
+            cursor: pointer;
+        }
+        
+        .indicator.active {
+            background: white;
+        }
+
+        .upload-form {
+            margin: 20px auto;
+        }
     </style>
 </head>
 <body>
 
 <h1 wicket:id="mensaje"></h1>
 <p wicket:id="nombre"></p>
+
+<div wicket:id="carouselContainer">
+    <div class="carousel">
+        <div class="carousel-track" id="carouselTrack">
+        </div>
+        <button class="carousel-btn carousel-prev" onclick="showPrevSlide()">‹</button>
+        <button class="carousel-btn carousel-next" onclick="showNextSlide()">›</button>
+        <div class="carousel-indicators" id="indicators"></div>
+    </div>
+
+    <!-- Datos del carrusel (OCULTO) -->
+    <span wicket:id="carouselData" id="carouselData" style="display:none"></span>
+</div>
+
+<form wicket:id="uploadForm" class="upload-form" enctype="multipart/form-data">
+    <input type="file" wicket:id="imageUpload" accept="image/*">
+    <br><br>
+    <button type="submit" class="btn" wicket:id="btnSubirImagen">
+        Subir imagen
+    </button>
+</form>
 
 <div wicket:id="feedback" class="feedback"></div>
 
@@ -66,7 +159,6 @@
     </div>
 </div>
 
-
     <button type="submit" class="btn" wicket:id="btnInsertar">
         Insertar datos
     </button>
@@ -75,8 +167,91 @@
     Ir al formulario
 </a>
 
-
 </form>
 
 </body>
+<script>
+    let carouselImages = [];
+    let currentIndex = 0;
+    let autoSlideInterval;
+    
+    function initCarousel() {
+        const data = document.getElementById("carouselData");
+        if (!data) return;
+        
+        try {
+            carouselImages = JSON.parse(data.textContent);
+        } catch (e) {
+            carouselImages = data.textContent.split(",").filter(img => img.trim() !== "");
+        }
+        
+        if (carouselImages.length === 0) {
+            console.log("No hay imágenes para mostrar");
+            return;
+        }
+        
+        const track = document.getElementById("carouselTrack");
+        const indicators = document.getElementById("indicators");
+        track.innerHTML = '';
+        indicators.innerHTML = '';
+        
+        carouselImages.forEach((img, index) => {
+            const slide = document.createElement('div');
+            slide.className = 'carousel-slide';
+            slide.innerHTML = `<img src="${img}" alt="Imagen ${index + 1}">`;
+            track.appendChild(slide);
+            
+            const indicator = document.createElement('div');
+            indicator.className = 'indicator';
+            if (index === 0) indicator.classList.add('active');
+            indicator.onclick = () => goToSlide(index);
+            indicators.appendChild(indicator);
+        });
+        
+        startAutoSlide();
+    }
+    
+    function goToSlide(index) {
+        if (index < 0) index = carouselImages.length - 1;
+        if (index >= carouselImages.length) index = 0;
+        
+        currentIndex = index;
+        const track = document.getElementById("carouselTrack");
+        track.style.transform = `translateX(-${currentIndex * 100}%)`;
+        
+        document.querySelectorAll('.indicator').forEach((indicator, i) => {
+            indicator.classList.toggle('active', i === currentIndex);
+        });
+        
+        resetAutoSlide();
+    }
+    
+    function showNextSlide() {
+        goToSlide(currentIndex + 1);
+    }
+    
+    function showPrevSlide() {
+        goToSlide(currentIndex - 1);
+    }
+    
+    function startAutoSlide() {
+        if (autoSlideInterval) clearInterval(autoSlideInterval);
+        autoSlideInterval = setInterval(showNextSlide, 5000); // 5 segundos
+    }
+    
+    function resetAutoSlide() {
+        clearInterval(autoSlideInterval);
+        startAutoSlide();
+    }
+    
+    document.querySelector('.carousel').addEventListener('mouseenter', () => {
+        clearInterval(autoSlideInterval);
+    });
+    
+    document.querySelector('.carousel').addEventListener('mouseleave', startAutoSlide);
+    
+    document.addEventListener('DOMContentLoaded', initCarousel);
+    
+    window.initCarousel = initCarousel;
+</script>
 </html>

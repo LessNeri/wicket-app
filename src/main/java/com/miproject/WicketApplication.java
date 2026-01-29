@@ -16,5 +16,6 @@ public class WicketApplication extends WebApplication {
         getCspSettings().blocking().disabled();
         getMarkupSettings().setDefaultMarkupEncoding("UTF-8");
     getRequestCycleSettings().setResponseRequestEncoding("UTF-8");
+    
     }
 }

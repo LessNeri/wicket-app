@@ -11,33 +11,189 @@
             padding: 40px;
         }
 
-        form {
+        .form-container, .confirmacion-container {
             display: inline-block;
             text-align: left;
             padding: 25px;
             border: 1px solid #ccc;
             border-radius: 8px;
+            background: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         }
 
         label {
             display: block;
             margin-top: 15px;
+            font-weight: bold;
+            color: #333;
         }
 
-        input {
-            width: 250px;
-            padding: 6px;
+        input[type="text"],
+        input[type="email"],
+        input[type="date"],
+        input[type="file"] {
+            width: 300px;
+            padding: 8px;
+            margin-top: 5px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        input[type="text"]:invalid,
+        input[type="email"]:invalid {
+            border-color: #ff6b6b;
+        }
+
+        input[type="text"]:valid,
+        input[type="email"]:valid {
+            border-color: #4CAF50;
+        }
+
+        input[type="file"] {
+            padding: 5px;
+            background: #f8f8f8;
         }
 
         button {
             margin-top: 20px;
-            padding: 10px 20px;
+            padding: 12px 24px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        button:hover {
+            background: #45a049;
+        }
+
+        button:disabled {
+            background: #cccccc;
+            cursor: not-allowed;
         }
 
         .feedback {
             margin-bottom: 20px;
+            padding: 10px;
+            border-radius: 4px;
+            background: #f8f8f8;
+            min-width: 300px;
+        }
+
+        .error {
+            color: #d32f2f;
+            background-color: #ffebee;
+            border: 1px solid #ffcdd2;
+        }
+
+        .success {
+            color: #388e3c;
+            background-color: #e8f5e9;
+            border: 1px solid #c8e6c9;
+        }
+
+        /* Estilos para la ventana de confirmación */
+        .confirmacion-container {
+            text-align: center;
+            max-width: 400px;
+        }
+
+        .confirmacion-container h2 {
+            color: #4CAF50;
+            margin-bottom: 20px;
+        }
+
+        .confirmacion-container p {
+            margin-bottom: 30px;
+            color: #666;
+        }
+
+        .btn-regresar {
+            background: #2196F3;
+        }
+
+        .btn-regresar:hover {
+            background: #1976D2;
+        }
+
+        .nota-archivos {
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+            margin-bottom: 10px;
+        }
+
+        .requerido {
+            color: #d32f2f;
+        }
+
+        .contador {
+            font-size: 12px;
+            color: #666;
+            text-align: right;
+            margin-top: 2px;
         }
     </style>
+
+    <script>
+        function limitarCaracteres(input, maxLength) {
+            if (input.value.length > maxLength) {
+                input.value = input.value.substring(0, maxLength);
+            }
+        }
+
+        function soloLetras(event) {
+            var charCode = event.charCode || event.keyCode;
+            if (charCode === 8 || charCode === 9 || charCode === 13 || charCode === 27) {
+                return true;
+            }
+            var charStr = String.fromCharCode(charCode);
+            return /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]$/.test(charStr);
+        }
+
+        function soloNumeros(event) {
+            var charCode = event.charCode || event.keyCode;
+            if (charCode === 8 || charCode === 9 || charCode === 13 || charCode === 27) {
+                return true;
+            }
+            var charStr = String.fromCharCode(charCode);
+            return /^\d$/.test(charStr);
+        }
+
+        function validarFormulario() {
+            var nombre = document.querySelector('[wicket\\:id="nombre"]');
+            var telefono = document.querySelector('[wicket\\:id="telefono"]');
+            var email = document.querySelector('[wicket\\:id="email"]');
+            var archivos = document.querySelector('[wicket\\:id="archivos"]');
+            
+            var valido = true;
+            
+            if (!nombre.value.trim()) {
+                alert("El campo Nombre es obligatorio");
+                valido = false;
+            }
+            
+            if (!telefono.value.trim()) {
+                alert("El campo Teléfono es obligatorio");
+                valido = false;
+            }
+            
+            if (!email.value.trim()) {
+                alert("El campo Correo electrónico es obligatorio");
+                valido = false;
+            }
+            
+            if (archivos.files.length === 0) {
+                alert("Debe seleccionar al menos un archivo");
+                valido = false;
+            }
+            
+            return valido;
+        }
+    </script>
 </head>
 <body>
 
@@ -45,28 +201,72 @@
 
 <div wicket:id="feedback" class="feedback"></div>
 
-<form wicket:id="formulario">
+<form wicket:id="formulario" class="form-container" onsubmit="return validarFormulario()">
 
-    <label>Nombre (solo letras)</label>
-    <input type="text" wicket:id="nombre"/>
+    <label>Nombre <span class="requerido">*</span></label>
+    <input type="text" wicket:id="nombre" 
+           maxlength="70" 
+           onkeypress="return soloLetras(event)"
+           oninput="limitarCaracteres(this, 70)"
+           required
+           title="Solo letras y espacios, máximo 70 caracteres"/>
+    <div class="contador" id="contador-nombre">0/70</div>
 
-    <label>Edad (solo números)</label>
-    <input type="text" wicket:id="edad"/>
+    <label>Correo electrónico <span class="requerido">*</span></label>
+    <input type="email" wicket:id="email" 
+           maxlength="100" 
+           oninput="limitarCaracteres(this, 100)"
+           required
+           pattern="[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
+           title="Ingrese un correo electrónico válido"/>
+    <div class="contador" id="contador-email">0/100</div>
 
-    <label>Email</label>
-    <input type="email" wicket:id="email"/>
+    <label>Teléfono <span class="requerido">*</span></label>
+    <input type="text" wicket:id="telefono" 
+           maxlength="10" 
+           onkeypress="return soloNumeros(event)"
+           oninput="limitarCaracteres(this, 10)"
+           required
+           pattern="\d{10}"
+           title="Ingrese exactamente 10 dígitos numéricos"/>
+    <div class="contador" id="contador-telefono">0/10</div>
 
-    <label>Teléfono (10 dígitos)</label>
-    <input type="text" wicket:id="telefono"/>
+    <label>Fecha de Nacimiento<span class="requerido">*</span></label>
+    <input type="date" wicket:id="fecha" required/>
 
-    <label>Fecha</label>
-    <input type="date" wicket:id="fecha"/>
+    <label>Archivos adjuntos <span class="requerido">*</span></label>
+    <input type="file" wicket:id="archivos" multiple required
+           accept=".jpg,.jpeg,.png,.gif,.pdf,.mp4,.avi,.mov,.doc,.docx,.xls,.xlsx"/>
+    <div class="nota-archivos">Formatos permitidos: imágenes, PDF, videos, Word, Excel. Máximo 10MB por archivo.</div>
 
     <button type="submit" wicket:id="enviar">
-        Enviar
+        Enviar Formulario
     </button>
 
 </form>
+
+<div wicket:id="ventanaConfirmacion" class="confirmacion-container">
+    <h2>✓ Formulario Enviado Exitosamente</h2>
+    <p>Tu información ha sido procesada correctamente.</p>
+    <p>Los archivos han sido recibidos y serán procesados.</p>
+    <button wicket:id="btnRegresarInicio" class="btn-regresar">
+        Regresar al Inicio
+    </button>
+</div>
+
+<script>
+    document.querySelector('[wicket\\:id="nombre"]').addEventListener('input', function(e) {
+        document.getElementById('contador-nombre').textContent = e.target.value.length + '/70';
+    });
+    
+    document.querySelector('[wicket\\:id="email"]').addEventListener('input', function(e) {
+        document.getElementById('contador-email').textContent = e.target.value.length + '/100';
+    });
+    
+    document.querySelector('[wicket\\:id="telefono"]').addEventListener('input', function(e) {
+        document.getElementById('contador-telefono').textContent = e.target.value.length + '/10';
+    });
+</script>
 
 </body>
 </html>

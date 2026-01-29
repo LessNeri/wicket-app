@@ -11,14 +11,12 @@ public class DatabaseManager {
     
     private static void inicializarBD() {
         try {
-            // Asegurar que el archivo SQLite exista en Render
             java.io.File dbFile = new java.io.File("wicketdb.sqlite");
             if (!dbFile.exists()) {
                 dbFile.createNewFile();
                 System.out.println("Archivo de base de datos creado en: " + dbFile.getAbsolutePath());
             }
             
-            // Conectar y crear tabla
             try (Connection conn = DriverManager.getConnection(DB_URL);
                  Statement stmt = conn.createStatement()) {
                 
