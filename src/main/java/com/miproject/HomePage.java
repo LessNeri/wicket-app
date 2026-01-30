@@ -58,33 +58,57 @@ public class HomePage extends BasePage {
         uploadForm.add(uploadField);
 
         uploadForm.add(new AjaxButton("btnSubirImagen", uploadForm) {
-            @Override
-            protected void onSubmit(AjaxRequestTarget target) {
+    @Override
+    protected void onSubmit(AjaxRequestTarget target) {
 
-                FileUpload upload = uploadField.getFileUpload();
+        FileUpload upload = uploadField.getFileUpload();
 
-                if (upload == null) {
-                    error("Selecciona una imagen");
-                } else if (ImageManager.saveUploadedImage(upload)) {
+        // ===== VALIDAR QUE HAYA ARCHIVO =====
+        if (upload == null) {
+            error("Selecciona una imagen");
+            target.add(getPage().get("feedback"));
+            return;
+        }
 
-                    List<String> nuevasImagenes =
-                            ImageManager.getCarruselImages(true);
+        // ===== VALIDAR TIPO DE ARCHIVO (SOLO IMÁGENES) =====
+        String contentType = upload.getContentType();
 
-                    carouselData.setDefaultModelObject(
-                            String.join(",", nuevasImagenes)
-                    );
+        boolean esImagen =
+                contentType != null && (
+                    contentType.equals("image/jpeg") ||
+                    contentType.equals("image/png") ||
+                    contentType.equals("image/gif") ||
+                    contentType.equals("image/webp")
+                );
 
-                    success("Imagen subida correctamente");
-                    target.add(carouselData);
-                    target.appendJavaScript("initCarousel();");
+        if (!esImagen) {
+            error("Solo se permiten imágenes (JPG, PNG, GIF, WEBP)");
+            target.add(getPage().get("feedback"));
+            return;
+        }
 
-                } else {
-                    error("Archivo no válido");
-                }
+        // ===== GUARDAR IMAGEN =====
+        if (ImageManager.saveUploadedImage(upload)) {
 
-                target.add(getPage().get("feedback"));
-            }
-        });
+            List<String> nuevasImagenes =
+                    ImageManager.getCarruselImages(true);
+
+            carouselData.setDefaultModelObject(
+                    String.join(",", nuevasImagenes)
+            );
+
+            success("Imagen subida correctamente");
+            target.add(carouselData);
+            target.appendJavaScript("initCarousel();");
+
+        } else {
+            error(" Error al guardar la imagen");
+        }
+
+        target.add(getPage().get("feedback"));
+    }
+});
+
 
         /* ====== FEEDBACK ====== */
         FeedbackPanel feedback = new FeedbackPanel("feedback");
@@ -122,11 +146,14 @@ public class HomePage extends BasePage {
         captchaContainer.setOutputMarkupId(true);
         formCaptcha.add(captchaContainer);
 
-
-/* ====== BOTÓN IR A INSERCIÓN DE DATOS ====== */
-btnIrInsercionDatos = new Button("btnIrInsercionDatos");
-// NO usar setEnabled(false) aquí - déjalo habilitado para Wicket
-btnIrInsercionDatos.setOutputMarkupId(true);
-formCaptcha.add(btnIrInsercionDatos);
+        btnIrInsercionDatos = new Button("btnIrInsercionDatos") {
+    @Override
+    public void onSubmit() {
+        System.out.println("=== BOTÓN IR A INSERCIÓN DE DATOS CLICKEADO ===");
+        setResponsePage(InsertarDatosPage.class);
+    }
+};
+        btnIrInsercionDatos.setOutputMarkupId(true);
+        formCaptcha.add(btnIrInsercionDatos);
     }
 }

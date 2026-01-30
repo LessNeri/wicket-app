@@ -5,37 +5,72 @@
     <title>Mi Aplicación</title>
 
     <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f5f5f5;
+        }
+
+        .page {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 30px;
+        }
+
+        /* ===== Breadcrumbs ===== */
         .breadcrumbs {
             margin-bottom: 20px;
             font-size: 14px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
         }
 
         .breadcrumbs a {
             text-decoration: none;
             color: #1976D2;
-            margin-right: 5px;
+            padding: 4px 8px;
+            border-radius: 4px;
+            background: #e3f2fd;
         }
 
-        .breadcrumbs a::after {
-            content: " / ";
+        .breadcrumbs span::after {
+            content: "›";
+            margin-left: 6px;
+            color: #999;
         }
 
-        .breadcrumbs a:last-child::after {
+        .breadcrumbs span:last-child::after {
             content: "";
+        }
+
+        /* ===== Contenedor común ===== */
+        .content {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
         }
     </style>
 </head>
+
 <body>
 
-<div class="breadcrumbs">
-    <span wicket:id="breadcrumbs">
-        <a wicket:id="link">
-            <span wicket:id="label"></span>
-        </a>
-    </span>
-</div>
+<div class="page">
 
-<wicket:child/>
+    <div class="breadcrumbs">
+        <span wicket:id="breadcrumbs">
+            <a wicket:id="link">
+                <span wicket:id="label"></span>
+            </a>
+        </span>
+    </div>
+
+    <div class="content">
+        <wicket:child/>
+    </div>
+
+</div>
 
 </body>
 </html>

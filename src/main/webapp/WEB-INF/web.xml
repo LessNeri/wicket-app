@@ -6,6 +6,7 @@
             http://xmlns.jcp.org/xml/ns/javaee/web-app_4_0.xsd"
          version="4.0">
 
+    <!-- WICKET -->
     <filter>
         <filter-name>wicket</filter-name>
         <filter-class>org.apache.wicket.protocol.http.WicketFilter</filter-class>
@@ -25,5 +26,18 @@
         <filter-name>wicket</filter-name>
         <url-pattern>/*</url-pattern>
     </filter-mapping>
+
+   <!-- ===== ERROR 404 PERSONALIZADO ===== -->
+<error-page>
+    <error-code>404</error-code>
+    <location>/error/404</location>
+</error-page>
+
+<!-- ===== ERROR 500 (OPCIONAL, RECOMENDADO) ===== -->
+<error-page>
+    <error-code>500</error-code>
+    <location>/error/404</location>
+</error-page>
+
 
 </web-app>

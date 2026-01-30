@@ -164,7 +164,7 @@
 </div>
 
     <!-- Token oculto -->
-    <input type="hidden" wicket:id="captchaToken"/>
+    <input type="hidden" wicket:id="captchaToken" id="captchaToken"/>
 
     <br>
 
@@ -250,19 +250,23 @@
     window.initCarousel = initCarousel;
     
         function onCaptchaVerified(token) {
-        console.log('Captcha verificado, token:', token);
-        
-        var tokenField = document.querySelector('[wicket\\:id="captchaToken"]');
-        if (tokenField) {
-            tokenField.value = token;
-        }
-        
-        var btnInsercion = document.querySelector('[wicket\\:id="btnIrInsercionDatos"]');
-        if (btnInsercion) {
-            btnInsercion.disabled = false;
-            btnInsercion.style.backgroundColor = '#4CAF50';
-        }
+    console.log('✅ Captcha verificado, token:', token);
+    
+    // 1. Guardar token
+    var tokenField = document.getElementById('captchaToken');
+    if (tokenField) {
+        tokenField.value = token;
     }
+    
+    // 2. Cambiar APARIENCIA del botón (NO usar disabled)
+    var btn = document.querySelector('[wicket\\:id="btnIrInsercionDatos"]');
+    if (btn) {
+        // Solo cambiar estilos, NO el atributo disabled
+        btn.style.opacity = '1';
+        btn.style.cursor = 'pointer';
+        btn.style.backgroundColor = '#4CAF50';
+    }
+}
     
     function onCaptchaExpired() {
         var btnInsercion = document.querySelector('[wicket\\:id="btnIrInsercionDatos"]');

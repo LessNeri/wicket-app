@@ -136,6 +136,12 @@
             text-align: right;
             margin-top: 2px;
         }
+
+        .form-container,
+.confirmacion-container {
+    margin: 0 auto;
+}
+
     </style>
 
     <script>
@@ -201,15 +207,18 @@
 
 <div wicket:id="feedback" class="feedback"></div>
 
-<form wicket:id="formulario" class="form-container" onsubmit="return validarFormulario()">
+<form wicket:id="formulario" class="form-container">
 
     <label>Nombre <span class="requerido">*</span></label>
-    <input type="text" wicket:id="nombre" 
-           maxlength="70" 
-           onkeypress="return soloLetras(event)"
-           oninput="limitarCaracteres(this, 70)"
-           required
-           title="Solo letras y espacios, máximo 70 caracteres"/>
+    <input type="text" wicket:id="nombre"
+       maxlength="70"
+       onkeypress="return soloLetras(event)"
+       oninput="
+           this.value=this.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g,'');
+           limitarCaracteres(this, 70);
+       "
+       required
+       title="Solo letras y espacios, máximo 70 caracteres"/>
     <div class="contador" id="contador-nombre">0/70</div>
 
     <label>Correo electrónico <span class="requerido">*</span></label>
@@ -222,22 +231,20 @@
     <div class="contador" id="contador-email">0/100</div>
 
     <label>Teléfono <span class="requerido">*</span></label>
-    <input type="text" wicket:id="telefono" 
-           maxlength="10" 
-           onkeypress="return soloNumeros(event)"
-           oninput="limitarCaracteres(this, 10)"
-           required
-           pattern="\d{10}"
-           title="Ingrese exactamente 10 dígitos numéricos"/>
+    <input type="text" wicket:id="telefono"
+       maxlength="10"
+       onkeypress="return soloNumeros(event)"
+       oninput="
+           this.value=this.value.replace(/[^0-9]/g,'');
+           limitarCaracteres(this, 10);
+       "
+       required
+       pattern="\d{10}"
+       title="Ingrese exactamente 10 dígitos numéricos"/>
     <div class="contador" id="contador-telefono">0/10</div>
 
     <label>Fecha de Nacimiento<span class="requerido">*</span></label>
     <input type="date" wicket:id="fecha" required/>
-
-    <label>Archivos adjuntos <span class="requerido">*</span></label>
-    <input type="file" wicket:id="archivos" multiple required
-           accept=".jpg,.jpeg,.png,.gif,.pdf,.mp4,.avi,.mov,.doc,.docx,.xls,.xlsx"/>
-    <div class="nota-archivos">Formatos permitidos: imágenes, PDF, videos, Word, Excel. Máximo 10MB por archivo.</div>
 
     <button type="submit" wicket:id="enviar">
         Enviar Formulario

@@ -78,10 +78,8 @@ public class ImageManager {
     public static List<String> getCarruselImages(boolean shuffle) {
     List<String> images = new ArrayList<>();
 
-    // 1️⃣ SIEMPRE mostrar predeterminadas
     images.addAll(getDefaultImages());
 
-    // 2️⃣ AGREGAR imágenes subidas
     File dir = getUploadDir();
     File[] files = dir.listFiles((d, n) ->
         n.matches("img_\\d+\\.(jpg|jpeg|png|webp)")

@@ -5,34 +5,32 @@ import java.util.List;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
-import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.form.Form;
-import org.apache.wicket.markup.html.form.TextField;
-import org.apache.wicket.markup.html.form.EmailTextField;
-import org.apache.wicket.markup.html.form.Button;
-import org.apache.wicket.markup.html.form.upload.FileUpload;
-import org.apache.wicket.markup.html.form.upload.FileUploadField;
-import org.apache.wicket.markup.html.panel.FeedbackPanel;
-import org.apache.wicket.model.Model;
-import org.apache.wicket.model.PropertyModel;
-import org.apache.wicket.validation.validator.PatternValidator;
-import org.apache.wicket.validation.validator.StringValidator;
 import org.apache.wicket.extensions.markup.html.form.DateTextField;
 import org.apache.wicket.markup.html.WebMarkupContainer;
+import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.form.*;
+import org.apache.wicket.markup.html.form.upload.FileUpload;
 import org.apache.wicket.markup.html.link.Link;
+import org.apache.wicket.markup.html.panel.FeedbackPanel;
+import org.apache.wicket.model.Model;
 import org.apache.wicket.util.lang.Bytes;
+import org.apache.wicket.validation.IValidator;
+import org.apache.wicket.validation.ValidationError;
 import org.apache.wicket.validation.validator.EmailAddressValidator;
+import org.apache.wicket.validation.validator.PatternValidator;
+import org.apache.wicket.validation.validator.StringValidator;
 
 public class FormularioPage extends BasePage {
 
-     private List<FileUpload> uploads = new java.util.ArrayList<>();
+    private List<FileUpload> uploads = new java.util.ArrayList<>();
+
     private TextField<String> nombreField;
     private TextField<String> telefonoField;
     private EmailTextField emailField;
-    
+
     public FormularioPage() {
-        // AGREGADO: Breadcrumbs para esta página
-        super(java.util.List.of(
+
+        super(List.of(
             new BreadcrumbItem("Inicio", HomePage.class),
             new BreadcrumbItem("Inserción de datos", InsertarDatosPage.class),
             new BreadcrumbItem("Formulario", FormularioPage.class)
@@ -56,61 +54,44 @@ public class FormularioPage extends BasePage {
             }
         });
 
+        // ================= FORMULARIO =================
         Form<Void> formulario = new Form<>("formulario") {
             @Override
             protected void onSubmit() {
-                super.onSubmit();
-                
                 this.setVisible(false);
                 ventanaConfirmacion.setVisible(true);
-                
-                if (uploads != null && !uploads.isEmpty()) {
-                    for (FileUpload upload : uploads) {
-                        System.out.println("Archivo subido: " + upload.getClientFileName() + 
-                                         " - Tamaño: " + upload.getSize() + " bytes" +
-                                         " - Tipo: " + upload.getContentType());
-                        
-                        try {
 
-                        } catch (Exception e) {
-                            System.err.println("Error al guardar archivo: " + e.getMessage());
-                        }
-                    }
-                }
-                
-                if (nombreField != null && nombreField.getConvertedInput() != null) {
+                if (nombreField.getModelObject() != null) {
                     DatabaseManager.insertarUsuario(
-                        nombreField.getConvertedInput(),
+                        nombreField.getModelObject(),
                         "Formulario"
                     );
                 }
             }
         };
-        
+
         formulario.setMultiPart(true);
         formulario.setMaxSize(Bytes.megabytes(50));
         formulario.setFileMaxSize(Bytes.megabytes(10));
-        
         add(formulario);
 
+        // ================= NOMBRE =================
         nombreField = new TextField<>("nombre", Model.of(""));
         nombreField.setLabel(Model.of("Nombre"));
         nombreField.setRequired(true);
         nombreField.add(StringValidator.lengthBetween(2, 70));
-        nombreField.add(new PatternValidator("^[a-zA-ZáéíóúÁÉÍÓÚñÑ]+(?:\\s+[a-zA-ZáéíóúÁÉÍÓÚñÑ]+)*$"));
+        nombreField.add(new PatternValidator(
+            "^[a-zA-ZáéíóúÁÉÍÓÚñÑ]+(?:\\s+[a-zA-ZáéíóúÁÉÍÓÚñÑ]+)*$"
+        ));
         nombreField.add(new AjaxFormComponentUpdatingBehavior("keyup") {
             @Override
             protected void onUpdate(AjaxRequestTarget target) {
                 target.add(feedback);
             }
-            
-            @Override
-            protected void onError(AjaxRequestTarget target, RuntimeException e) {
-                target.add(feedback);
-            }
         });
         formulario.add(nombreField);
 
+        // ================= EMAIL =================
         emailField = new EmailTextField("email", Model.of(""));
         emailField.setLabel(Model.of("Correo electrónico"));
         emailField.setRequired(true);
@@ -121,14 +102,10 @@ public class FormularioPage extends BasePage {
             protected void onUpdate(AjaxRequestTarget target) {
                 target.add(feedback);
             }
-            
-            @Override
-            protected void onError(AjaxRequestTarget target, RuntimeException e) {
-                target.add(feedback);
-            }
         });
         formulario.add(emailField);
 
+        // ================= TELÉFONO =================
         telefonoField = new TextField<>("telefono", Model.of(""));
         telefonoField.setLabel(Model.of("Teléfono"));
         telefonoField.setRequired(true);
@@ -137,54 +114,57 @@ public class FormularioPage extends BasePage {
         telefonoField.add(new AjaxFormComponentUpdatingBehavior("keyup") {
             @Override
             protected void onUpdate(AjaxRequestTarget target) {
-                String input = telefonoField.getInput();
-                if (input != null && input.length() > 10) {
-                    telefonoField.setModelObject(input.substring(0, 10));
-                    error("El teléfono no puede tener más de 10 dígitos");
-                }
-                target.add(feedback);
-            }
-            
-            @Override
-            protected void onError(AjaxRequestTarget target, RuntimeException e) {
                 target.add(feedback);
             }
         });
         formulario.add(telefonoField);
 
+        // ================= FECHA DE NACIMIENTO =================
         DateTextField fecha = new DateTextField(
-                "fecha",
-                Model.of(new Date()),
-                "yyyy-MM-dd"
+            "fecha",
+            Model.of(new Date()),
+            "yyyy-MM-dd"
         );
-        fecha.setLabel(Model.of("Fecha"));
+        fecha.setLabel(Model.of("Fecha de Nacimiento"));
         fecha.setRequired(true);
+
+        fecha.add((IValidator<Date>) validatable -> {
+            Date nacimiento = validatable.getValue();
+            Date hoy = new Date();
+
+            if (nacimiento.after(hoy)) {
+                validatable.error(new ValidationError()
+                    .setMessage("La fecha de nacimiento no puede ser futura"));
+                return;
+            }
+
+            long edad = (hoy.getTime() - nacimiento.getTime())
+                    / (1000L * 60 * 60 * 24 * 365);
+
+            if (edad < 10 || edad > 120) {
+                validatable.error(new ValidationError()
+                    .setMessage("La edad debe estar entre 10 y 120 años"));
+            }
+        });
+
         fecha.add(new AjaxFormComponentUpdatingBehavior("change") {
             @Override
             protected void onUpdate(AjaxRequestTarget target) {
                 target.add(feedback);
             }
-            
-            @Override
-            protected void onError(AjaxRequestTarget target, RuntimeException e) {
-                target.add(feedback);
-            }
         });
+
         formulario.add(fecha);
 
-        FileUploadField archivos = new FileUploadField("archivos", 
-            new PropertyModel<List<FileUpload>>(this, "uploads"));
-        archivos.setLabel(Model.of("Archivos (imágenes, PDF, videos, Word, Excel)"));
-        archivos.setRequired(true); // Hacer obligatorio
-        formulario.add(archivos);
 
+        // ================= BOTÓN =================
         formulario.add(new Button("enviar"));
     }
-    
+
     public List<FileUpload> getUploads() {
         return uploads;
     }
-    
+
     public void setUploads(List<FileUpload> uploads) {
         this.uploads = uploads;
     }
