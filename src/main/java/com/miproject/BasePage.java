@@ -2,11 +2,12 @@ package com.miproject;
 
 import java.util.List;
 
-import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.markup.html.WebPage;
 import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 public abstract class BasePage extends WebPage {
 
@@ -16,17 +17,23 @@ public abstract class BasePage extends WebPage {
             @Override
             protected void populateItem(ListItem<BreadcrumbItem> item) {
                 BreadcrumbItem bc = item.getModelObject();
-
-                // USAR AjaxLink EN LUGAR DE Link
-                AjaxLink<Void> link = new AjaxLink<Void>("link") {
-                    @Override
-                    public void onClick(org.apache.wicket.ajax.AjaxRequestTarget target) {
-                        setResponsePage(bc.getPageClass());
-                    }
-                };
                 
-                link.add(new Label("label", bc.getLabel()));
-                item.add(link);
+                // SOLUCIÓN: Usar WebMarkupContainer en lugar de cualquier Link
+                WebMarkupContainer linkContainer = new WebMarkupContainer("link");
+                
+                // Generar la URL
+                String url = urlFor(bc.getPageClass(), new PageParameters()).toString();
+                
+                // Añadir atributo onclick con JavaScript
+                linkContainer.add(new org.apache.wicket.AttributeModifier("onclick", 
+                    "window.location.href='" + url + "'; return false;"));
+                
+                // Añadir estilo de cursor pointer
+                linkContainer.add(new org.apache.wicket.AttributeModifier("style", 
+                    "cursor: pointer;"));
+                
+                linkContainer.add(new Label("label", bc.getLabel()));
+                item.add(linkContainer);
             }
         });
     }

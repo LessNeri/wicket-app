@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html xmlns:wicket="http://wicket.apache.org">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eliminar Usuario</title>
+    
+    <style>
+        /* PALETA MORADA (consistente) */
+        :root {
+            --morado-oscuro: #4332af;
+            --morado-medio: #725ec3;
+            --morado-claro: #a18bd7;
+            --lavanda: #d0b8eb;
+            --fondo-suave: #ffe5ff;
+            --blanco: #ffffff;
+            --error: #e74c3c;
+            --exito: #2ecc71;
+            --advertencia: #f39c12;
+        }
+        
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f5f5f5;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .page {
+            max-width: 600px;
+            width: 100%;
+            padding: 20px;
+        }
+        
+        /* ===== Breadcrumbs ===== */
+        .breadcrumbs {
+            margin-bottom: 25px;
+            font-size: 14px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            align-items: center;
+        }
+        
+        .breadcrumbs a {
+            text-decoration: none;
+            color: var(--morado-oscuro);
+            padding: 6px 12px;
+            border-radius: 6px;
+            background: var(--fondo-suave);
+            transition: all 0.3s ease;
+            border: 1px solid var(--lavanda);
+        }
+        
+        .breadcrumbs a:hover {
+            background: var(--lavanda);
+            transform: translateY(-1px);
+        }
+        
+        .breadcrumbs span::after {
+            content: "›";
+            margin-left: 8px;
+            color: var(--morado-claro);
+            font-weight: bold;
+        }
+        
+        .breadcrumbs span:last-child::after {
+            content: "";
+        }
+        
+        /* ===== Contenedor principal ===== */
+        .content {
+            background: var(--blanco);
+            padding: 40px;
+            border-radius: 16px;
+            box-shadow: 0 8px 30px rgba(67, 50, 175, 0.15);
+            border: 1px solid var(--lavanda);
+            text-align: center;
+        }
+        
+        /* ===== Icono de advertencia ===== */
+        .warning-icon {
+            font-size: 64px;
+            color: var(--error);
+            margin-bottom: 20px;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        
+        /* ===== Títulos ===== */
+        .page-title {
+            color: var(--error);
+            margin-top: 0;
+            margin-bottom: 15px;
+            font-size: 28px;
+            font-weight: 600;
+        }
+        
+        .subtitle {
+            color: var(--morado-oscuro);
+            margin-bottom: 25px;
+            font-size: 18px;
+        }
+        
+        /* ===== Tarjeta de información del usuario ===== */
+        .user-card {
+            background: var(--fondo-suave);
+            border: 2px solid var(--lavanda);
+            border-radius: 12px;
+            padding: 25px;
+            margin: 30px 0;
+            text-align: left;
+        }
+        
+        .user-info {
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--lavanda);
+        }
+        
+        .user-info:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+        
+        .info-label {
+            font-weight: 600;
+            color: var(--morado-oscuro);
+            font-size: 15px;
+            min-width: 120px;
+        }
+        
+        .info-value {
+            color: #333;
+            font-size: 15px;
+            flex: 1;
+            text-align: right;
+            word-break: break-word;
+        }
+        
+        .user-id {
+            background: var(--morado-medio);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+            display: inline-block;
+        }
+        
+        /* ===== Mensaje de advertencia ===== */
+        .warning-message {
+            background: linear-gradient(135deg, #fff3cd, #ffeaa7);
+            border: 2px solid #ffc107;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 25px 0;
+            text-align: center;
+            color: #856404;
+        }
+        
+        .warning-message strong {
+            display: block;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+        
+        /* ===== Contenedor de estados ===== */
+        .state-container {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .state-container.mostrar {
+            display: block;
+        }
+        
+        /* ===== Estado de carga ===== */
+        .loading-state {
+            padding: 40px;
+            color: var(--morado-medio);
+        }
+        
+        .spinner {
+            border: 4px solid var(--fondo-suave);
+            border-top: 4px solid var(--morado-medio);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* ===== Estado de error ===== */
+        .error-state {
+            padding: 40px;
+            color: var(--error);
+        }
+        
+        .error-icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+        }
+        
+        /* ===== Estado de éxito ===== */
+        .success-state {
+            padding: 40px;
+            color: var(--exito);
+        }
+        
+        .success-icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+        }
+        
+        /* ===== Botones ===== */
+        .buttons-container {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        
+        .btn {
+            min-width: 160px;
+            padding: 16px 32px;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+            text-align: center;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .btn-danger {
+            background: linear-gradient(135deg, var(--error), #ff6b6b);
+            color: white;
+            box-shadow: 0 4px 15px rgba(231, 76, 60, 0.3);
+        }
+        
+        .btn-danger:hover:not(:disabled) {
+            background: linear-gradient(135deg, #c0392b, var(--error));
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(231, 76, 60, 0.4);
+        }
+        
+        .btn-secondary {
+            background: var(--fondo-suave);
+            color: var(--morado-oscuro);
+            border: 2px solid var(--lavanda);
+        }
+        
+        .btn-secondary:hover {
+            background: var(--lavanda);
+            transform: translateY(-2px);
+        }
+        
+        .btn-success {
+            background: linear-gradient(135deg, var(--exito), #27ae60);
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background: linear-gradient(135deg, #27ae60, var(--exito));
+            transform: translateY(-2px);
+        }
+        
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+        
+        /* ===== Feedback messages ===== */
+        .feedback-message {
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        .feedback-message.mostrar {
+            display: block;
+        }
+        
+        .feedback-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .feedback-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        /* ===== Responsive ===== */
+        @media (max-width: 768px) {
+            .page {
+                padding: 15px;
+            }
+            
+            .content {
+                padding: 30px 20px;
+            }
+            
+            .page-title {
+                font-size: 24px;
+            }
+            
+            .subtitle {
+                font-size: 16px;
+            }
+            
+            .user-card {
+                padding: 20px 15px;
+            }
+            
+            .user-info {
+                flex-direction: column;
+                align-items: flex-start;
+                text-align: left;
+            }
+            
+            .info-value {
+                text-align: left;
+                margin-top: 5px;
+            }
+            
+            .buttons-container {
+                flex-direction: column;
+            }
+            
+            .btn {
+                width: 100%;
+                padding: 14px 20px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .content {
+                padding: 25px 15px;
+            }
+            
+            .page-title {
+                font-size: 22px;
+            }
+            
+            .warning-icon {
+                font-size: 48px;
+            }
+            
+            .warning-message {
+                padding: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="page">
+    
+    <!-- Breadcrumbs automáticos desde BasePage -->
+    <div class="breadcrumbs">
+        <span wicket:id="breadcrumbs">
+            <a wicket:id="link">
+                <span wicket:id="label"></span>
+            </a>
+        </span>
+    </div>
+    
+    <div class="content">
+        
+        <!-- Estado inicial: Confirmación -->
+        <div id="confirmState" class="state-container mostrar">
+            <!-- Icono de advertencia -->
+            <div class="warning-icon"></div>
+            
+            <!-- Títulos -->
+            <h1 class="page-title">Confirmar Eliminación</h1>
+            <div class="subtitle">
+                Está a punto de eliminar permanentemente un usuario
+            </div>
+            
+            <!-- Mensaje de advertencia -->
+            <div class="warning-message">
+                <strong>¡ADVERTENCIA!</strong>
+                Esta acción no se puede deshacer. Todos los datos del usuario serán eliminados permanentemente.
+            </div>
+            
+            <!-- Información del usuario -->
+            <div class="user-card">
+                <div class="user-info">
+                    <span class="info-label">Nombre:</span>
+                    <span class="info-value" id="userNombre">Cargando...</span>
+                </div>
+                <div class="user-info">
+                    <span class="info-label">Email:</span>
+                    <span class="info-value" id="userEmail">Cargando...</span>
+                </div>
+                <div class="user-info">
+                    <span class="info-label">Teléfono:</span>
+                    <span class="info-value" id="userTelefono">Cargando...</span>
+                </div>
+            </div>
+            
+            <!-- Botones de acción -->
+            <div class="buttons-container">
+                <button id="btnConfirmar" class="btn btn-danger">
+                    <span></span> Sí, Eliminar Usuario
+                </button>
+                <a href="gestion-usuarios" class="btn btn-secondary">
+                    <span></span> Cancelar
+                </a>
+            </div>
+        </div>
+        
+        <!-- Estado: Cargando -->
+        <div id="loadingState" class="state-container loading-state">
+            <div class="spinner"></div>
+            <div>Eliminando usuario...</div>
+        </div>
+        
+        <!-- Estado: Éxito -->
+        <div id="successState" class="state-container success-state">
+            <div class="success-icon">✓</div>
+            <h2>¡Usuario Eliminado!</h2>
+            <p>El usuario ha sido eliminado exitosamente.</p>
+            <p id="successDetails" style="font-size: 14px; color: #666; margin-top: 10px;"></p>
+            <div class="buttons-container" style="margin-top: 25px;">
+                <a href="gestion-usuarios" class="btn btn-success">
+                    Volver a Gestión de Usuarios
+                </a>
+            </div>
+        </div>
+        
+        <!-- Estado: Error -->
+        <div id="errorState" class="state-container error-state">
+            <div class="error-icon">⚠️</div>
+            <h2>Error al Eliminar</h2>
+            <p id="errorMessage">Ocurrió un error al intentar eliminar el usuario.</p>
+            <div class="buttons-container" style="margin-top: 25px;">
+                <a href="gestion-usuarios" class="btn btn-secondary">
+                    Volver a Gestión de Usuarios
+                </a>
+                <button id="btnReintentar" class="btn btn-danger">
+                    Reintentar
+                </button>
+            </div>
+        </div>
+        
+        <!-- Mensajes de feedback (para errores de carga) -->
+        <div id="feedbackMessage" class="feedback-message"></div>
+    </div>
+</div>
+
+<script>
+    // URL de la API
+    const API_BASE_URL = window.location.origin + '/crud?action=api';
+    
+const idUsuario = parseInt(new URLSearchParams(window.location.search).get('id') || '0');
+    
+    // Estados
+    const estados = {
+        CONFIRMAR: 'confirmar',
+        CARGANDO: 'cargando',
+        EXITO: 'exito',
+        ERROR: 'error'
+    };
+    
+    let estadoActual = estados.CONFIRMAR;
+    let datosUsuario = null;
+    
+    // Elementos DOM
+    const elementos = {
+        // Contenedores de estado
+        confirmState: document.getElementById('confirmState'),
+        loadingState: document.getElementById('loadingState'),
+        successState: document.getElementById('successState'),
+        errorState: document.getElementById('errorState'),
+        
+        // Información del usuario
+        userNombre: document.getElementById('userNombre'),
+        userEmail: document.getElementById('userEmail'),
+        userTelefono: document.getElementById('userTelefono'),
+        
+        // Botones
+        btnConfirmar: document.getElementById('btnConfirmar'),
+        btnReintentar: document.getElementById('btnReintentar'),
+        
+        // Feedback
+        feedbackMessage: document.getElementById('feedbackMessage'),
+        successDetails: document.getElementById('successDetails'),
+        errorMessage: document.getElementById('errorMessage')
+    };
+    
+    // ===== FUNCIONES DE ESTADO =====
+    
+    function cambiarEstado(nuevoEstado, datos = null) {
+        // Ocultar todos los estados
+        Object.values(elementos).forEach(el => {
+            if (el.classList?.contains?.('state-container')) {
+                el.classList.remove('mostrar');
+            }
+        });
+        
+        // Mostrar el estado correspondiente
+        switch (nuevoEstado) {
+            case estados.CONFIRMAR:
+                elementos.confirmState.classList.add('mostrar');
+                break;
+            case estados.CARGANDO:
+                elementos.loadingState.classList.add('mostrar');
+                break;
+            case estados.EXITO:
+                if (datos) {
+                    elementos.successDetails.textContent = 
+                        `Usuario "${datos.nombre}" ha sido eliminado exitosamente.`;
+                }
+                elementos.successState.classList.add('mostrar');
+                break;
+            case estados.ERROR:
+                if (datos?.mensaje) {
+                    elementos.errorMessage.textContent = datos.mensaje;
+                }
+                elementos.errorState.classList.add('mostrar');
+                break;
+        }
+        
+        estadoActual = nuevoEstado;
+    }
+    
+    function mostrarFeedback(mensaje, tipo = 'error') {
+        elementos.feedbackMessage.textContent = mensaje;
+        elementos.feedbackMessage.className = `feedback-message feedback-${tipo} mostrar`;
+        
+        setTimeout(() => {
+            elementos.feedbackMessage.classList.remove('mostrar');
+        }, 5000);
+    }
+    
+    // ===== FUNCIONES DE DATOS =====
+    
+    async function cargarDatosUsuario() {
+        if (!idUsuario || idUsuario <= 0) {
+            mostrarFeedback('ID de usuario inválido.');
+            return;
+        }
+        
+        try {
+            // Cargar todos los usuarios
+            const response = await fetch(API_BASE_URL + '&metodo=listar');
+            
+            if (!response.ok) {
+                throw new Error(`Error HTTP: ${response.status}`);
+            }
+            
+            const usuarios = await response.json();
+            
+            // Buscar el usuario específico
+            const usuario = usuarios.find(u => u.id === idUsuario);
+            
+            if (!usuario) {
+                mostrarFeedback(`Usuario con ID ${idUsuario} no encontrado.`);
+                return;
+            }
+            
+            // Guardar datos
+            datosUsuario = usuario;
+            
+            // Actualizar UI
+            actualizarInformacionUsuario(usuario);
+            
+        } catch (error) {
+            console.error('Error cargando usuario:', error);
+            mostrarFeedback('Error al cargar datos del usuario: ' + error.message);
+        }
+    }
+    
+    function actualizarInformacionUsuario(usuario) {
+        elementos.userNombre.textContent = usuario.nombre || 'No disponible';
+        elementos.userEmail.textContent = usuario.email || 'No disponible';
+        elementos.userTelefono.textContent = usuario.telefono || 'No disponible';
+    }
+    
+    // ===== FUNCIONES DE ELIMINACIÓN =====
+    
+    async function eliminarUsuario() {
+        if (!datosUsuario) {
+            mostrarFeedback('No se pueden obtener los datos del usuario.');
+            return;
+        }
+        
+        // Confirmación adicional
+        const confirmacion = confirm(`¿ESTÁ ABSOLUTAMENTE SEGURO de eliminar a "${datosUsuario.nombre}"?\n\nEsta acción es PERMANENTE e IRREVERSIBLE.`);
+        
+        if (!confirmacion) {
+            return;
+        }
+        
+        cambiarEstado(estados.CARGANDO);
+        
+        try {
+            const response = await fetch(API_BASE_URL + '&metodo=eliminar', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ id: idUsuario })
+            });
+            
+            const resultado = await response.json();
+            
+            // Pequeño delay para mejor UX
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            
+            if (response.ok && resultado.status === 'ok') {
+    cambiarEstado(estados.EXITO, datosUsuario);
+} else {
+                cambiarEstado(estados.ERROR, {
+                    mensaje: 'Error al eliminar el usuario. Intente nuevamente.'
+                });
+            }
+            
+        } catch (error) {
+            console.error('Error eliminando usuario:', error);
+            cambiarEstado(estados.ERROR, {
+                mensaje: 'Error de conexión: ' + error.message
+            });
+        }
+    }
+    
+    // ===== INICIALIZACIÓN =====
+    
+    document.addEventListener('DOMContentLoaded', function() {
+        // Cargar datos del usuario
+        cargarDatosUsuario();
+        
+        // Configurar botón de confirmación
+        elementos.btnConfirmar.addEventListener('click', eliminarUsuario);
+        
+        // Configurar botón de reintentar
+        elementos.btnReintentar.addEventListener('click', function() {
+            cambiarEstado(estados.CONFIRMAR);
+        });
+        
+        // Prevenir envío accidental con Enter
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Enter' && estadoActual === estados.CONFIRMAR) {
+                event.preventDefault();
+            }
+        });
+    });
+    
+    // Hacer funciones accesibles globalmente
+    window.eliminarUsuario = eliminarUsuario;
+    window.cargarDatosUsuario = cargarDatosUsuario;
+</script>
+
+</body>
+</html>

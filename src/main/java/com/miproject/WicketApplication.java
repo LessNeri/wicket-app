@@ -22,6 +22,15 @@ public class WicketApplication extends WebApplication {
     protected void init() {
         super.init();
 
+        mountPage("/gestion-usuarios", GestionUsuariosPage.class);
+        mountPage("/registrar", RegistrarUsuarioPage.class);
+        mountPage("/editar", EditarUsuarioPage.class);
+        mountPage("/eliminar", EliminarUsuarioPage.class);
+
+        mountPage("/crud", CrudPage.class);
+
+        mountPage("/api/usuarios", UsuariosApiPage.class);
+
         mountPage("/error/404", Error404Page.class);
 
         // ================= CONFIGURACIÓN GENERAL =================

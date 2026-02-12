@@ -47,6 +47,13 @@
             <version>2.15.2</version>
         </dependency>
 
+        <dependency>
+        <groupId>org.postgresql</groupId>
+        <artifactId>postgresql</artifactId>
+        <version>42.7.2</version>
+        </dependency>
+
+
         <!-- Servlet API (necesaria para WAR, provista por webapp-runner) -->
         <dependency>
     <groupId>javax.servlet</groupId>

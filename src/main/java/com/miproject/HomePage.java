@@ -14,6 +14,7 @@ import org.apache.wicket.markup.html.form.upload.FileUploadField;
 import org.apache.wicket.markup.html.panel.FeedbackPanel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.util.lang.Bytes;
+import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 
 public class HomePage extends BasePage {
 
@@ -155,5 +156,7 @@ public class HomePage extends BasePage {
 };
         btnIrInsercionDatos.setOutputMarkupId(true);
         formCaptcha.add(btnIrInsercionDatos);
+
+add(new BookmarkablePageLink<Void>("linkGestionUsuarios", GestionUsuariosPage.class));
     }
 }

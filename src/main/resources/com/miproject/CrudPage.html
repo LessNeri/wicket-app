@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Administración de Usuarios</title>
+    <style>
+        /* TUS ESTILOS ORIGINALES (MEJORADOS PARA CRUD) */
+        body { font-family: Arial, sans-serif; text-align: center; padding: 20px; background-color: #f4f4f9; }
+        
+        .main-container { display: flex; flex-direction: column; align-items: center; gap: 20px; }
+
+        /* Estilo del Formulario */
+        .form-container {
+            width: 100%; max-width: 500px; padding: 25px;
+            border: 1px solid #ccc; border-radius: 8px;
+            background: white; box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            text-align: left;
+        }
+
+        label { display: block; margin-top: 15px; font-weight: bold; color: #333; }
+        .requerido { color: #d32f2f; }
+        
+        input { width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box;}
+        input:focus { border-color: #4CAF50; outline: none; }
+
+        /* Botones */
+        .btn-group { margin-top: 20px; display: flex; gap: 10px; }
+        button { flex: 1; padding: 12px; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; color: white; transition: 0.3s;}
+        
+        #btnGuardar { background: #4CAF50; }
+        #btnGuardar:hover { background: #45a049; }
+        
+        #btnCancelar { background: #9e9e9e; }
+        #btnCancelar:hover { background: #757575; }
+
+        /* Contadores */
+        .contador { font-size: 12px; color: #666; text-align: right; margin-top: 2px; }
+
+        /* ESTILOS DE LA TABLA (CRUD) */
+        .table-container {
+            width: 100%; max-width: 900px;
+            background: white; padding: 20px; border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { border-bottom: 1px solid #ddd; padding: 12px; text-align: left; }
+        th { background-color: #2196F3; color: white; }
+        tr:hover { background-color: #f1f1f1; }
+
+        .btn-editar { background: #ffc107; color: black; padding: 5px 10px; font-size: 14px; margin-right: 5px;}
+        .btn-eliminar { background: #dc3545; padding: 5px 10px; font-size: 14px;}
+    </style>
+</head>
+<body>
+
+<div class="main-container">
+    
+    <div class="form-container">
+        <h2 style="color: #4CAF50; text-align: center;">Gestión de Usuarios</h2>
+        
+        <input type="hidden" id="userId"> <label>Nombre <span class="requerido">*</span></label>
+        <input type="text" id="nombre" maxlength="70" placeholder="Nombre completo"
+               oninput="validarTexto(this, 70, 'contador-nombre')">
+        <div class="contador" id="contador-nombre">0/70</div>
+
+        <label>Correo electrónico <span class="requerido">*</span></label>
+        <input type="email" id="email" maxlength="100" placeholder="correo@ejemplo.com"
+               oninput="actualizarContador(this, 'contador-email')">
+        <div class="contador" id="contador-email">0/100</div>
+
+        <label>Teléfono <span class="requerido">*</span></label>
+        <input type="text" id="telefono" maxlength="10" placeholder="10 dígitos"
+               oninput="validarNumeros(this, 'contador-telefono')">
+        <div class="contador" id="contador-telefono">0/10</div>
+
+        <label>Fecha de Nacimiento <span class="requerido">*</span></label>
+        <input type="date" id="fecha">
+
+        <div class="btn-group">
+            <button id="btnGuardar" onclick="guardarUsuario()">Guardar Usuario</button>
+            <button id="btnCancelar" onclick="limpiarFormulario()">Limpiar</button>
+        </div>
+    </div>
+
+    <div class="table-container">
+        <h3>Lista de Registros (PostgreSQL)</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Nombre</th>
+                    <th>Email</th>
+                    <th>Teléfono</th>
+                    <th>Fecha Nac.</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody id="tablaCuerpo">
+                </tbody>
+        </table>
+    </div>
+
+</div>
+
+<script>
+    const API_URL = window.location.href.split('?')[0] + '?action=api';
+
+    // --- VALIDACIONES VISUALES (Tus funciones adaptadas) ---
+    function validarTexto(input, max, idContador) {
+        input.value = input.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g,''); // Solo letras
+        actualizarContador(input, idContador);
+    }
+
+    function validarNumeros(input, idContador) {
+        input.value = input.value.replace(/[^0-9]/g,''); // Solo números
+        actualizarContador(input, idContador);
+    }
+
+    function actualizarContador(input, idContador) {
+        document.getElementById(idContador).textContent = input.value.length + '/' + input.getAttribute('maxlength');
+    }
+
+    // --- LÓGICA DEL CRUD (Fetch API) ---
+    
+    document.addEventListener("DOMContentLoaded", cargarUsuarios);
+
+    async function cargarUsuarios() {
+        try {
+            const response = await fetch(API_URL + '&metodo=listar');
+            const usuarios = await response.json();
+            const tbody = document.getElementById('tablaCuerpo');
+            tbody.innerHTML = ''; 
+
+            usuarios.forEach(u => {
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${u.id}</td>
+                        <td>${u.nombre}</td>
+                        <td>${u.email}</td>
+                        <td>${u.telefono}</td>
+                        <td>${u.fechaNacimiento || '-'}</td>
+                        <td>
+                            <button class="btn-editar" onclick='editar(${JSON.stringify(u)})'>Editar</button>
+                            <button class="btn-eliminar" onclick="eliminar(${u.id})">Eliminar</button>
+                        </td>
+                    </tr>
+                `;
+            });
+        } catch (e) { console.error("Error conectando:", e); }
+    }
+
+    async function guardarUsuario() {
+        // Validaciones antes de enviar
+        const nombre = document.getElementById('nombre').value;
+        const email = document.getElementById('email').value;
+        const telefono = document.getElementById('telefono').value;
+        const fecha = document.getElementById('fecha').value;
+
+        if(!nombre || !email || !telefono || !fecha) {
+            alert("Por favor completa todos los campos requeridos.");
+            return;
+        }
+
+        const id = document.getElementById('userId').value;
+        const usuario = { id: id ? parseInt(id) : 0, nombre, email, telefono, fechaNacimiento: fecha };
+        const metodo = id ? 'actualizar' : 'crear';
+
+        try {
+            const res = await fetch(API_URL + '&metodo=' + metodo, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(usuario)
+            });
+
+            if (res.ok) {
+                alert(id ? "Usuario actualizado" : "Usuario creado exitosamente");
+                limpiarFormulario();
+                cargarUsuarios(); // ¡Aquí está la magia! La tabla se actualiza sola.
+            } else {
+                alert("Error al guardar en base de datos.");
+            }
+        } catch (e) { console.error(e); }
+    }
+
+    async function eliminar(id) {
+        if(!confirm("¿Eliminar este usuario de la base de datos?")) return;
+        await fetch(API_URL + '&metodo=eliminar', {
+            method: 'POST',
+            body: JSON.stringify({id})
+        });
+        cargarUsuarios();
+    }
+
+    function editar(u) {
+        document.getElementById('userId').value = u.id;
+        document.getElementById('nombre').value = u.nombre;
+        document.getElementById('email').value = u.email;
+        document.getElementById('telefono').value = u.telefono;
+        document.getElementById('fecha').value = u.fechaNacimiento;
+        
+        document.getElementById('btnGuardar').textContent = "Actualizar Usuario";
+        document.getElementById('btnGuardar').style.background = "#ffc107";
+        document.getElementById('btnGuardar').style.color = "black";
+    }
+
+    function limpiarFormulario() {
+        document.getElementById('userId').value = '';
+        document.getElementById('nombre').value = '';
+        document.getElementById('email').value = '';
+        document.getElementById('telefono').value = '';
+        document.getElementById('fecha').value = '';
+        
+        // Reset contadores
+        document.querySelectorAll('.contador').forEach(c => c.textContent = c.textContent.split('/')[1] ? '0/' + c.textContent.split('/')[1] : '0');
+        
+        document.getElementById('btnGuardar').textContent = "Guardar Usuario";
+        document.getElementById('btnGuardar').style.background = "#4CAF50";
+        document.getElementById('btnGuardar').style.color = "white";
+    }
+</script>
+
+</body>
+</html>
