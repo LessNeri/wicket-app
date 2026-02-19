@@ -336,6 +336,80 @@
             Registrar Nuevo Usuario
         </a>
         
+        <!-- ===== FILTROS ===== -->
+<div style="margin-bottom: 25px; display: flex; gap: 15px; flex-wrap: wrap; align-items: center; background: var(--fondo-suave); padding: 15px; border-radius: 8px;">
+    
+    <!-- Buscador en tiempo real -->
+    <div style="flex: 2; min-width: 250px;">
+        <input type="text" 
+               id="buscador"
+               placeholder="Buscar por nombre..."
+               style="width: 100%; padding: 12px 15px; border: 2px solid var(--lavanda); border-radius: 8px; font-size: 14px; background: white;"
+               onkeyup="buscarEnTiempoReal()">
+    </div>
+    
+    <!-- Icono para desplegar filtro de fecha -->
+    <div>
+        <button id="btnFiltroFecha" 
+                style="background: var(--morado-medio); color: white; border: none; padding: 12px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; display: flex; align-items: center; gap: 8px;"
+                onclick="toggleFiltroFecha()">
+            <span></span> Filtrar por fecha
+        </button>
+    </div>
+    
+    <!-- Selector de resultados por página -->
+    <div style="display: flex; align-items: center; gap: 8px;">
+        <label style="color: var(--morado-oscuro); font-weight: 500;">Mostrar:</label>
+        <select id="tamanoPagina" 
+                style="padding: 10px; border: 2px solid var(--lavanda); border-radius: 8px; background: white;"
+                onchange="cambiarTamanoPagina()">
+            <option value="5">5</option>
+            <option value="10" selected>10</option>
+            <option value="20">20</option>
+            <option value="50">50</option>
+        </select>
+    </div>
+</div>
+
+<!-- ===== FILTRO DE FECHAS (OCULTO INICIALMENTE) ===== -->
+<div id="filtroFechaContainer" 
+     style="display: none; margin-bottom: 20px; padding: 20px; background: white; border: 2px solid var(--lavanda); border-radius: 8px; animation: slideDown 0.3s ease;">
+    
+    <div style="display: flex; gap: 20px; flex-wrap: wrap; align-items: flex-end;">
+        <div style="flex: 1;">
+            <label style="display: block; margin-bottom: 5px; font-weight: 600; color: var(--morado-oscuro);">Desde:</label>
+            <input type="date" id="fechaDesde" style="width: 100%; padding: 10px; border: 2px solid var(--lavanda); border-radius: 8px;">
+        </div>
+        <div style="flex: 1;">
+            <label style="display: block; margin-bottom: 5px; font-weight: 600; color: var(--morado-oscuro);">Hasta:</label>
+            <input type="date" id="fechaHasta" style="width: 100%; padding: 10px; border: 2px solid var(--lavanda); border-radius: 8px;">
+        </div>
+        <div style="display: flex; gap: 10px;">
+            <button onclick="aplicarFiltroFecha()" 
+                    style="background: var(--morado-oscuro); color: white; border: none; padding: 10px 25px; border-radius: 8px; cursor: pointer; font-weight: bold;">
+                Aplicar
+            </button>
+            <button onclick="limpiarFiltroFecha()" 
+                    style="background: #e74c3c; color: white; border: none; padding: 10px 25px; border-radius: 8px; cursor: pointer; font-weight: bold;">
+                Limpiar
+            </button>
+        </div>
+    </div>
+</div>
+
+<style>
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+</style>
+
         <!-- Contenedor de la tabla -->
         <div class="table-container">
             <table class="data-table" id="tablaUsuarios">
@@ -351,7 +425,7 @@
                 <tbody id="cuerpoTabla">
                     <!-- Estado inicial: cargando -->
                     <tr id="filaCargando">
-                        <td colspan="6" class="cargando">
+                        <td colspan="5" class="cargando">
                             <div>Cargando datos de usuarios...</div>
                         </td>
                     </tr>
@@ -362,39 +436,64 @@
 </div>
 
 <script>
-    // URL de la API (usando CrudPage existente como backend)
+    // ===== CONFIGURACIÓN =====
     const API_BASE_URL = window.location.origin + '/crud?action=api';
     
-    // URLs de las páginas Wicket
-    // Estas deben coincidir con las rutas montadas en WicketApplication
     const URLS = {
-        EDITAR: 'editar',      // Para EditarUsuarioPage
-        ELIMINAR: 'eliminar'   // Para EliminarUsuarioPage
+        EDITAR: 'editar',
+        ELIMINAR: 'eliminar'
     };
     
-    // Elementos DOM
+    // ===== ELEMENTOS DOM =====
     const tablaCuerpo = document.getElementById('cuerpoTabla');
     const filaCargando = document.getElementById('filaCargando');
     
+    // ===== ESTADO GLOBAL =====
+    let paginaActual = 1;
+    let tamanoPagina = 10;
+    let totalResultados = 0;
+    let filtros = {
+        search: '',
+        fechaDesde: '',
+        fechaHasta: ''
+    };
+    let timeoutBusqueda = null;
+
     // ===== FUNCIONES PRINCIPALES =====
     
-    // 1. Cargar usuarios desde la API
-    async function cargarUsuarios() {
+    async function cargarUsuariosConFiltros() {
         try {
             mostrarEstadoCargando();
             
-            const response = await fetch(API_BASE_URL + '&metodo=listar');
+            // Construir URL con filtros y paginación
+            let url = `${API_BASE_URL}&metodo=listar`;
+            url += `&pagina=${paginaActual}`;
+            url += `&tamano=${tamanoPagina}`;
+            
+            if (filtros.search) {
+                url += `&search=${encodeURIComponent(filtros.search)}`;
+            }
+            if (filtros.fechaDesde) {
+                url += `&fechaDesde=${filtros.fechaDesde}`;
+            }
+            if (filtros.fechaHasta) {
+                url += `&fechaHasta=${filtros.fechaHasta}`;
+            }
+            
+            const response = await fetch(url);
             
             if (!response.ok) {
                 throw new Error(`Error HTTP: ${response.status}`);
             }
             
-            const usuarios = await response.json();
+            const data = await response.json();  // { usuarios: [], total: 123 }
             
-            if (usuarios.length === 0) {
+            if (data.usuarios.length === 0) {
                 mostrarEstadoVacio();
             } else {
-                renderizarTabla(usuarios);
+                renderizarTabla(data.usuarios);
+                totalResultados = data.total;
+                renderizarPaginacion();
             }
             
         } catch (error) {
@@ -402,20 +501,17 @@
             mostrarEstadoError('Error al cargar los datos: ' + error.message);
         }
     }
-    
-    // 2. Renderizar la tabla con datos
+
     function renderizarTabla(usuarios) {
         tablaCuerpo.innerHTML = '';
         
         usuarios.forEach(usuario => {
             const fila = document.createElement('tr');
             
-            // Formatear fecha (si existe)
             const fechaFormateada = usuario.fechaNacimiento 
                 ? new Date(usuario.fechaNacimiento).toLocaleDateString('es-ES')
                 : '-';
             
-            // Generar URLs para las páginas Wicket con parámetros
             const urlEditar = `${URLS.EDITAR}?id=${usuario.id}`;
             const urlEliminar = `${URLS.ELIMINAR}?id=${usuario.id}`;
             
@@ -425,19 +521,130 @@
                 <td>${escapeHTML(usuario.telefono || '')}</td>
                 <td>${fechaFormateada}</td>
                 <td class="acciones-cell">
-                    <a href="${urlEditar}" class="btn-accion btn-editar" title="Editar usuario">
-                        Editar
-                    </a>
-                    <a href="${urlEliminar}" class="btn-accion btn-eliminar" title="Eliminar usuario">
-                        Eliminar
-                    </a>
+                    <a href="${urlEditar}" class="btn-accion btn-editar">Editar</a>
+                    <a href="${urlEliminar}" class="btn-accion btn-eliminar">Eliminar</a>
                 </td>
             `;
             
             tablaCuerpo.appendChild(fila);
         });
     }
+
+    // ===== FILTROS Y BÚSQUEDA =====
     
+    function toggleFiltroFecha() {
+        const container = document.getElementById('filtroFechaContainer');
+        const btn = document.getElementById('btnFiltroFecha');
+        
+        if (!container) return;
+        
+        if (container.style.display === 'none' || container.style.display === '') {
+            container.style.display = 'block';
+            if (btn) btn.style.background = 'var(--morado-oscuro)';
+        } else {
+            container.style.display = 'none';
+            if (btn) btn.style.background = 'var(--morado-medio)';
+        }
+    }
+
+    function aplicarFiltroFecha() {
+        filtros.fechaDesde = document.getElementById('fechaDesde')?.value || '';
+        filtros.fechaHasta = document.getElementById('fechaHasta')?.value || '';
+        paginaActual = 1;
+        cargarUsuariosConFiltros();
+        toggleFiltroFecha();
+    }
+
+    function limpiarFiltroFecha() {
+        const desde = document.getElementById('fechaDesde');
+        const hasta = document.getElementById('fechaHasta');
+        if (desde) desde.value = '';
+        if (hasta) hasta.value = '';
+        filtros.fechaDesde = '';
+        filtros.fechaHasta = '';
+        paginaActual = 1;
+        cargarUsuariosConFiltros();
+    }
+
+    function buscarEnTiempoReal() {
+        clearTimeout(timeoutBusqueda);
+        timeoutBusqueda = setTimeout(() => {
+            filtros.search = document.getElementById('buscador')?.value || '';
+            paginaActual = 1;
+            cargarUsuariosConFiltros();
+        }, 300);
+    }
+
+    function cambiarTamanoPagina() {
+        const select = document.getElementById('tamanoPagina');
+        if (select) {
+            tamanoPagina = parseInt(select.value);
+            paginaActual = 1;
+            cargarUsuariosConFiltros();
+        }
+    }
+
+    function irPagina(pagina) {
+        paginaActual = pagina;
+        cargarUsuariosConFiltros();
+    }
+
+    // ===== PAGINACIÓN =====
+    
+    function renderizarPaginacion() {
+        const totalPaginas = Math.ceil(totalResultados / tamanoPagina);
+        
+        let paginacionDiv = document.getElementById('paginacion');
+        if (!paginacionDiv) {
+            paginacionDiv = document.createElement('div');
+            paginacionDiv.id = 'paginacion';
+            paginacionDiv.style.marginTop = '20px';
+            paginacionDiv.style.display = 'flex';
+            paginacionDiv.style.justifyContent = 'center';
+            paginacionDiv.style.gap = '5px';
+            paginacionDiv.style.flexWrap = 'wrap';
+            document.querySelector('.content').appendChild(paginacionDiv);
+        }
+        
+        let html = '';
+        
+        // Botón Anterior
+        html += `<button onclick="irPagina(${paginaActual - 1})" 
+            style="padding: 8px 12px; background: ${paginaActual === 1 ? '#ccc' : 'var(--morado-medio)'}; color: white; border: none; border-radius: 4px; cursor: ${paginaActual === 1 ? 'not-allowed' : 'pointer'};"
+            ${paginaActual === 1 ? 'disabled' : ''}>
+            Anterior
+        </button>`;
+        
+        // Números de página (máximo 5)
+        const inicio = Math.max(1, paginaActual - 2);
+        const fin = Math.min(totalPaginas, inicio + 4);
+        
+        for (let i = inicio; i <= fin; i++) {
+            html += `<button onclick="irPagina(${i})" 
+                style="padding: 8px 12px; background: ${i === paginaActual ? 'var(--morado-oscuro)' : 'var(--morado-claro)'}; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                ${i}
+            </button>`;
+        }
+        
+        // Botón Siguiente
+        html += `<button onclick="irPagina(${paginaActual + 1})" 
+            style="padding: 8px 12px; background: ${paginaActual === totalPaginas ? '#ccc' : 'var(--morado-medio)'}; color: white; border: none; border-radius: 4px; cursor: ${paginaActual === totalPaginas ? 'not-allowed' : 'pointer'};"
+            ${paginaActual === totalPaginas ? 'disabled' : ''}>
+            Siguiente
+        </button>`;
+        
+        // Texto informativo
+        const desde = ((paginaActual - 1) * tamanoPagina) + 1;
+        const hasta = Math.min(paginaActual * tamanoPagina, totalResultados);
+        
+        html += `<div style="margin-left: 15px; color: var(--morado-oscuro); align-self: center;">
+            Mostrando ${desde} - ${hasta} de ${totalResultados}
+        </div>`;
+        
+        paginacionDiv.innerHTML = html;
+    }
+
+    // ===== ESTADOS UI =====
     
     function mostrarEstadoCargando() {
         tablaCuerpo.innerHTML = `
@@ -447,14 +654,17 @@
                 </td>
             </tr>
         `;
+        // Eliminar paginación mientras carga
+        const pagDiv = document.getElementById('paginacion');
+        if (pagDiv) pagDiv.innerHTML = '';
     }
-    
+
     function mostrarEstadoError(mensaje) {
         tablaCuerpo.innerHTML = `
             <tr>
                 <td colspan="5" class="error">
                     <div>${escapeHTML(mensaje)}</div>
-                    <button onclick="cargarUsuarios()" style="
+                    <button onclick="cargarUsuariosConFiltros()" style="
                         margin-top: 10px;
                         padding: 8px 16px;
                         background: var(--morado-medio);
@@ -469,7 +679,7 @@
             </tr>
         `;
     }
-    
+
     function mostrarEstadoVacio() {
         tablaCuerpo.innerHTML = `
             <tr>
@@ -482,22 +692,26 @@
             </tr>
         `;
     }
-    
-    // ===== FUNCIONES UTILITARIAS =====
-    
+
     function escapeHTML(text) {
         const div = document.createElement('div');
         div.textContent = text;
         return div.innerHTML;
     }
-    
+
+    // ===== INICIALIZACIÓN =====
     
     document.addEventListener('DOMContentLoaded', function() {
-        cargarUsuarios();
+        cargarUsuariosConFiltros();
     });
-    
-    // Hacer función accesible globalmente para reintentos
-    window.cargarUsuarios = cargarUsuarios;
+
+    window.cargarUsuariosConFiltros = cargarUsuariosConFiltros;
+    window.toggleFiltroFecha = toggleFiltroFecha;
+    window.aplicarFiltroFecha = aplicarFiltroFecha;
+    window.limpiarFiltroFecha = limpiarFiltroFecha;
+    window.buscarEnTiempoReal = buscarEnTiempoReal;
+    window.cambiarTamanoPagina = cambiarTamanoPagina;
+    window.irPagina = irPagina;
 </script>
 
 </body>

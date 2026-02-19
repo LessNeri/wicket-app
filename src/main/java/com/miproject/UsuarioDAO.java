@@ -59,6 +59,108 @@ public class UsuarioDAO {
         return lista;
     }
 
+    // 5. BUSCAR CON FILTROS Y PAGINACIÓN (NUEVO)
+public List<Usuario> buscarConFiltros(String search, String fechaDesde, String fechaHasta, int page, int size) {
+    List<Usuario> lista = new ArrayList<>();
+    
+    // Construimos el SQL dinámicamente
+    StringBuilder sql = new StringBuilder("SELECT * FROM usuarios WHERE 1=1");
+    
+    // Filtro por nombre (búsqueda parcial, insensible a mayúsculas)
+    if (search != null && !search.trim().isEmpty()) {
+        sql.append(" AND LOWER(nombre) LIKE LOWER(?)");
+    }
+    
+    // Filtro por rango de fechas
+    if (fechaDesde != null && !fechaDesde.isEmpty()) {
+        sql.append(" AND fecha_nacimiento >= ?");
+    }
+    if (fechaHasta != null && !fechaHasta.isEmpty()) {
+        sql.append(" AND fecha_nacimiento <= ?");
+    }
+    
+    // Ordenamiento y paginación
+    sql.append(" ORDER BY id DESC LIMIT ? OFFSET ?");
+    
+    try (Connection con = ConexionDB.conectar();
+         PreparedStatement ps = con.prepareStatement(sql.toString())) {
+        
+        int index = 1;
+        
+        // Asignamos los valores según los filtros activos
+        if (search != null && !search.trim().isEmpty()) {
+            ps.setString(index++, "%" + search + "%");
+        }
+        if (fechaDesde != null && !fechaDesde.isEmpty()) {
+            ps.setDate(index++, Date.valueOf(fechaDesde));
+        }
+        if (fechaHasta != null && !fechaHasta.isEmpty()) {
+            ps.setDate(index++, Date.valueOf(fechaHasta));
+        }
+        
+        // Límite y offset para paginación
+        ps.setInt(index++, size);
+        ps.setInt(index++, (page - 1) * size);
+        
+        ResultSet rs = ps.executeQuery();
+        
+        while (rs.next()) {
+            Usuario u = new Usuario();
+            u.setId(rs.getInt("id"));
+            u.setNombre(rs.getString("nombre"));
+            u.setEmail(rs.getString("email"));
+            u.setTelefono(rs.getString("telefono"));
+            
+            Date fecha = rs.getDate("fecha_nacimiento");
+            u.setFechaNacimiento(fecha != null ? fecha.toString() : "");
+            
+            lista.add(u);
+        }
+    } catch (SQLException e) {
+        e.printStackTrace();
+    }
+    return lista;
+}
+
+// 6. CONTAR TOTAL DE RESULTADOS CON FILTROS (NUEVO)
+public int contarConFiltros(String search, String fechaDesde, String fechaHasta) {
+    StringBuilder sql = new StringBuilder("SELECT COUNT(*) FROM usuarios WHERE 1=1");
+    
+    if (search != null && !search.trim().isEmpty()) {
+        sql.append(" AND LOWER(nombre) LIKE LOWER(?)");
+    }
+    if (fechaDesde != null && !fechaDesde.isEmpty()) {
+        sql.append(" AND fecha_nacimiento >= ?");
+    }
+    if (fechaHasta != null && !fechaHasta.isEmpty()) {
+        sql.append(" AND fecha_nacimiento <= ?");
+    }
+    
+    try (Connection con = ConexionDB.conectar();
+         PreparedStatement ps = con.prepareStatement(sql.toString())) {
+        
+        int index = 1;
+        
+        if (search != null && !search.trim().isEmpty()) {
+            ps.setString(index++, "%" + search + "%");
+        }
+        if (fechaDesde != null && !fechaDesde.isEmpty()) {
+            ps.setDate(index++, Date.valueOf(fechaDesde));
+        }
+        if (fechaHasta != null && !fechaHasta.isEmpty()) {
+            ps.setDate(index++, Date.valueOf(fechaHasta));
+        }
+        
+        ResultSet rs = ps.executeQuery();
+        if (rs.next()) {
+            return rs.getInt(1);
+        }
+    } catch (SQLException e) {
+        e.printStackTrace();
+    }
+    return 0;
+}
+
     // 3. ACTUALIZAR (UPDATE)
     public boolean actualizarUsuario(Usuario u) {
         String sql = "UPDATE usuarios SET nombre=?, email=?, telefono=?, fecha_nacimiento=? WHERE id=?";

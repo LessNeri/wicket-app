@@ -10,8 +10,5 @@ public class RegistrarUsuarioPage extends BasePage {
             new BreadcrumbItem("Gestión Usuarios", GestionUsuariosPage.class),
             new BreadcrumbItem("Registrar", RegistrarUsuarioPage.class)
         ));
-        
-        // Esta página será principalmente HTML/JavaScript
-        // El formulario enviará datos via Fetch API a CrudPage
     }
 }
