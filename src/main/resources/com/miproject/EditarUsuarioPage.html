@@ -512,44 +512,38 @@
     
     // 1. Cargar datos del usuario
     async function cargarDatosUsuario() {
-        if (!idUsuario || idUsuario <= 0) {
-            mostrarError('ID de usuario inválido');
+    if (!idUsuario || idUsuario <= 0) {
+        mostrarError('ID de usuario inválido');
+        return;
+    }
+    
+    try {
+        const response = await fetch(API_BASE_URL + '&metodo=listar');
+        
+        if (!response.ok) {
+            throw new Error(`Error HTTP: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        const usuarios = data.usuarios || [];
+        
+        const usuario = usuarios.find(u => u.id === idUsuario);
+        
+        if (!usuario) {
+            mostrarError(`Usuario con ID ${idUsuario} no encontrado`);
             return;
         }
         
-        try {
-            // Primero cargar todos los usuarios
-            const response = await fetch(API_BASE_URL + '&metodo=listar');
-            
-            if (!response.ok) {
-                throw new Error(`Error HTTP: ${response.status}`);
-            }
-            
-            const usuarios = await response.json();
-            
-            // Buscar el usuario específico
-            const usuario = usuarios.find(u => u.id === idUsuario);
-            
-            if (!usuario) {
-                mostrarError(`Usuario con ID ${idUsuario} no encontrado`);
-                return;
-            }
-            
-            // Guardar datos originales
-            datosOriginales = usuario;
-            
-            // Rellenar formulario
-            rellenarFormulario(usuario);
-            
-            // Mostrar formulario
-            cargandoContainer.style.display = 'none';
-            formContainer.classList.add('mostrar');
-            
-        } catch (error) {
-            console.error('Error cargando usuario:', error);
-            mostrarError('Error al cargar datos del usuario: ' + error.message);
-        }
+        datosOriginales = usuario;
+        rellenarFormulario(usuario);
+        cargandoContainer.style.display = 'none';
+        formContainer.classList.add('mostrar');
+        
+    } catch (error) {
+        console.error('Error cargando usuario:', error);
+        mostrarError('Error al cargar datos del usuario: ' + error.message);
     }
+}
     
     // 2. Rellenar formulario con datos
     function rellenarFormulario(usuario) {
@@ -772,6 +766,12 @@
             if (response.ok && resultado.status === 'ok') {
     mostrarFeedback('¡Usuario actualizado exitosamente!', 'exito');
     datosOriginales = usuarioActualizado;
+    
+    // Redirigir después de 1.5 segundos
+    setTimeout(() => {
+        window.location.href = 'gestion-usuarios';
+    }, 1500);
+    
 } else {
     mostrarFeedback('Error al actualizar el usuario. Intente nuevamente.', 'error');
 }

@@ -586,11 +586,9 @@ const idUsuario = parseInt(new URLSearchParams(window.location.search).get('id')
                 throw new Error(`Error HTTP: ${response.status}`);
             }
             
-            const usuarios = await response.json();
-            
-            // Buscar el usuario específico
-            const usuario = usuarios.find(u => u.id === idUsuario);
-            
+            const data = await response.json();
+const usuarios = data.usuarios || [];
+const usuario = usuarios.find(u => u.id === idUsuario);
             if (!usuario) {
                 mostrarFeedback(`Usuario con ID ${idUsuario} no encontrado.`);
                 return;
@@ -647,11 +645,17 @@ const idUsuario = parseInt(new URLSearchParams(window.location.search).get('id')
             
             if (response.ok && resultado.status === 'ok') {
     cambiarEstado(estados.EXITO, datosUsuario);
+    
+    // Redirigir después de 1.5 segundos
+    setTimeout(() => {
+        window.location.href = 'gestion-usuarios';
+    }, 1500);
+    
 } else {
-                cambiarEstado(estados.ERROR, {
-                    mensaje: 'Error al eliminar el usuario. Intente nuevamente.'
-                });
-            }
+    cambiarEstado(estados.ERROR, {
+        mensaje: 'Error al eliminar el usuario. Intente nuevamente.'
+    });
+}
             
         } catch (error) {
             console.error('Error eliminando usuario:', error);
