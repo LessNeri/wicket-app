@@ -1,76 +1,298 @@
 <!DOCTYPE html>
 <html xmlns:wicket="http://wicket.apache.org">
+
 <head>
     <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mi Aplicación</title>
-
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
-        body {
+        :root {
+            --morado-oscuro: #4332af;
+            --morado-medio: #725ec3;
+            --fondo-suave: #ffe5ff;
+            --blanco: #ffffff;
+        }
+
+        * {
             margin: 0;
-            font-family: Arial, sans-serif;
-            background: #f5f5f5;
+            padding: 0;
+            box-sizing: border-box;
         }
 
-        .page {
-            max-width: 1000px;
-            margin: 0 auto;
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: #f8f9fc;
+        }
+
+        .app-container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            width: 280px;
+            background: var(--morado-oscuro);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+            transition: width 0.3s ease;
+            /* Animación de encogimiento */
+            z-index: 1000;
+        }
+
+        /* ===== ESTADO COLAPSADO (SOLO ÍCONOS) ===== */
+        .sidebar.collapsed {
+            width: 70px;
+        }
+
+        .sidebar.collapsed .hide-on-collapse {
+            display: none !important;
+        }
+
+        .sidebar.collapsed .sidebar-header {
+            padding: 20px 0;
+            text-align: center;
+        }
+
+        .sidebar.collapsed .menu-item {
+            justify-content: center;
+            padding: 15px 0;
+        }
+
+        .sidebar.collapsed .menu-item i {
+            margin: 0;
+            font-size: 20px;
+        }
+
+        /* Botón para ocultar/mostrar menú */
+        .toggle-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            color: white;
+            padding: 15px;
+            cursor: pointer;
+            text-align: center;
+            transition: background 0.3s;
+        }
+
+        .toggle-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .sidebar-header {
+            padding: 25px 20px;
+            border-bottom: 1px solid var(--morado-medio);
+            text-align: center;
+        }
+
+        .sidebar-menu {
+            flex: 1;
+            padding: 20px 0;
+        }
+
+        .menu-section {
+            margin-bottom: 15px;
+        }
+
+        .menu-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 20px;
+            color: white;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            gap: 12px;
+            cursor: pointer;
+        }
+
+        .menu-item:hover {
+            background: var(--morado-medio);
+            padding-left: 25px;
+        }
+
+        /* ===== SUBMENÚS TIPO ACORDEÓN ===== */
+        .submenu-container {
+            max-height: 0;
+            /* Oculto por defecto */
+            overflow: hidden;
+            background: rgba(0, 0, 0, 0.15);
+            transition: max-height 0.4s ease-in-out;
+            /* Animación de despliegue */
+        }
+
+        .submenu-container.active {
+            max-height: 300px;
+            /* Suficiente para mostrar los hijos */
+        }
+
+        .submenu-item {
+            padding-left: 45px;
+            font-size: 14px;
+        }
+
+        .sidebar.collapsed .submenu-item {
+            padding-left: 0;
+            justify-content: center;
+        }
+
+        .chevron {
+            margin-left: auto;
+            font-size: 12px;
+            transition: transform 0.3s;
+        }
+
+        .active-chevron {
+            transform: rotate(180deg);
+        }
+
+        /* Gira la flechita */
+
+        .logout {
+            margin-top: auto;
+            border-top: 1px solid var(--morado-medio);
+            padding: 15px 20px;
+        }
+
+        .logout a {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: white;
+            text-decoration: none;
+            padding: 10px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .logout a:hover {
+            background: var(--morado-medio);
+        }
+
+        .main-content {
+            flex: 1;
+            margin-left: 280px;
             padding: 30px;
+            transition: margin-left 0.3s ease;
         }
 
-        /* ===== Breadcrumbs ===== */
+        .main-content.expanded {
+            margin-left: 70px;
+        }
+
         .breadcrumbs {
             margin-bottom: 20px;
             font-size: 14px;
             display: flex;
+            align-items: center;
             flex-wrap: wrap;
-            gap: 5px;
+        }
+
+        .breadcrumbs span {
+            display: flex;
+            align-items: center;
+        }
+
+        .breadcrumbs span+span::before {
+            content: "\f054";
+            font-family: "Font Awesome 6 Free";
+            font-weight: 900;
+            color: var(--morado-medio);
+            margin: 0 10px;
+            font-size: 11px;
         }
 
         .breadcrumbs a {
             text-decoration: none;
-            color: #1976D2;
-            padding: 4px 8px;
-            border-radius: 4px;
-            background: #e3f2fd;
-        }
-
-        .breadcrumbs span::after {
-            content: "›";
-            margin-left: 6px;
-            color: #999;
-        }
-
-        .breadcrumbs span:last-child::after {
-            content: "";
-        }
-
-        /* ===== Contenedor común ===== */
-        .content {
-            background: white;
-            padding: 30px;
-            border-radius: 8px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            color: var(--morado-oscuro);
+            padding: 4px 10px;
+            background: var(--fondo-suave);
+            border-radius: 6px;
+            font-weight: 600;
         }
     </style>
 </head>
 
 <body>
+    <div class="app-container">
 
-<div class="page">
+        <div class="sidebar" id="sidebar">
+            <button class="toggle-btn" onclick="toggleSidebar()">
+                <i class="fas fa-bars"></i>
+            </button>
 
-    <div class="breadcrumbs">
-        <span wicket:id="breadcrumbs">
-            <a wicket:id="link">
-                <span wicket:id="label"></span>
-            </a>
-        </span>
+            <div class="sidebar-header">
+                <h2><i class="fas fa-chart-line"></i> <span class="hide-on-collapse">Sistema</span></h2>
+                <p class="hide-on-collapse">Gestión Empresarial</p>
+            </div>
+
+            <div class="sidebar-menu">
+
+                <div wicket:id="listaMenus" class="menu-section">
+
+                    <div class="menu-item" onclick="toggleSubmenuDinamico(this)">
+                        <i wicket:id="iconoMenuPadre"></i>
+                        <span class="hide-on-collapse" wicket:id="nombreMenuPadre">Nombre Principal</span>
+                        <i class="fas fa-chevron-down chevron hide-on-collapse"></i>
+                    </div>
+
+                    <div class="submenu-container">
+                        <span wicket:id="listaSubmenus">
+                            <a wicket:id="linkSubmenu" class="menu-item submenu-item">
+                                <i wicket:id="iconoSubmenu"></i>
+                                <span class="hide-on-collapse" wicket:id="nombreSubmenu">Nombre Submenú</span>
+                            </a>
+                        </span>
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="logout">
+                <a wicket:id="logout"><i class="fas fa-sign-out-alt"></i> <span class="hide-on-collapse">Cerrar
+                        Sesión</span></a>
+            </div>
+        </div>
+
+        <div class="main-content" id="main-content">
+            <div class="breadcrumbs">
+                <span wicket:id="breadcrumbs">
+                    <a wicket:id="link"><span wicket:id="label"></span></a>
+                </span>
+            </div>
+
+            <wicket:child />
+
+        </div>
     </div>
 
-    <div class="content">
-        <wicket:child/>
-    </div>
+    <script>
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('collapsed');
+            document.getElementById('main-content').classList.toggle('expanded');
 
-</div>
+            if (document.getElementById('sidebar').classList.contains('collapsed')) {
+                document.querySelectorAll('.submenu-container').forEach(sub => sub.classList.remove('active'));
+                document.querySelectorAll('.chevron').forEach(icon => icon.classList.remove('active-chevron'));
+            }
+        }
 
+        function toggleSubmenuDinamico(element) {
+            if (document.getElementById('sidebar').classList.contains('collapsed')) {
+                toggleSidebar();
+            }
+
+            let submenu = element.nextElementSibling;
+            let chevron = element.querySelector('.chevron');
+
+            submenu.classList.toggle('active');
+            if (chevron) chevron.classList.toggle('active-chevron');
+        }
+    </script>
 </body>
+
 </html>

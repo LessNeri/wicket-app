@@ -1,0 +1,311 @@
+<wicket:extend>
+    <wicket:head>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+        <style>
+            :root {
+                --morado-oscuro: #4332af;
+                --morado-medio: #725ec3;
+                --morado-claro: #a18bd7;
+                --lavanda: #d0b8eb;
+                --fondo-suave: #f9f7ff;
+                --blanco: #ffffff;
+                --error: #e74c3c;
+                --exito: #2ecc71;
+                --sombra: rgba(0, 0, 0, 0.08);
+            }
+
+            .page-container {
+                max-width: 850px;
+                margin: 0 auto;
+                padding: 20px;
+            }
+
+            .content {
+                background: var(--blanco);
+                padding: 40px;
+                border-radius: 20px;
+                box-shadow: 0 10px 30px var(--sombra);
+                border: 1px solid var(--lavanda);
+            }
+
+            .page-title {
+                color: var(--morado-oscuro);
+                margin-top: 0;
+                margin-bottom: 30px;
+                font-size: 26px;
+                font-weight: 700;
+                text-align: center;
+                border-bottom: 2px solid var(--fondo-suave);
+                padding-bottom: 15px;
+            }
+
+            .form-row {
+                display: flex;
+                gap: 25px;
+                flex-wrap: wrap;
+                margin-bottom: 10px;
+            }
+
+            .form-col {
+                flex: 1;
+                min-width: 250px;
+            }
+
+            .form-group {
+                margin-bottom: 20px;
+            }
+
+            .content label {
+                display: block;
+                margin-bottom: 8px;
+                font-weight: 600;
+                color: #555;
+                font-size: 14px;
+            }
+
+            .content label i {
+                margin-right: 8px;
+                color: var(--morado-claro);
+            }
+
+            .content input,
+            .content select {
+                width: 100%;
+                padding: 8px 12px;
+                border: 2px solid var(--lavanda);
+                border-radius: 8px;
+                font-size: 14px;
+                box-sizing: border-box;
+                background: white;
+                transition: all 0.3s ease;
+            }
+
+            .content input:focus,
+            .content select:focus {
+                outline: none;
+                border-color: var(--morado-medio);
+                box-shadow: 0 0 0 4px var(--fondo-suave);
+            }
+
+            input[type="file"] {
+                padding: 10px;
+                cursor: pointer;
+            }
+
+            .btn-group {
+                display: flex;
+                gap: 15px;
+                margin-top: 35px;
+                padding-top: 20px;
+                border-top: 1px solid var(--fondo-suave);
+                flex-wrap: wrap;
+            }
+
+            .content button,
+            .content a.btn-link {
+                flex: none;
+                width: 48%;
+                padding: 12px;
+                border-radius: 12px;
+                font-size: 16px;
+                font-weight: 600;
+                cursor: pointer;
+                text-decoration: none;
+                text-align: center;
+                transition: all 0.3s ease;
+                display: flex;
+                /* Cambiado de inline-flex */
+                align-items: center;
+                justify-content: center;
+                gap: 10px;
+                box-sizing: border-box;
+            }
+
+            .btn-primary {
+                background: var(--morado-oscuro);
+                color: white;
+                border: none;
+            }
+
+            .btn-primary:hover {
+                background: var(--morado-medio);
+                transform: translateY(-2px);
+                box-shadow: 0 5px 15px rgba(67, 50, 175, 0.3);
+            }
+
+            .btn-secondary {
+                background: var(--fondo-suave);
+                color: var(--morado-oscuro);
+                border: 1px solid var(--lavanda);
+            }
+
+            .btn-secondary:hover {
+                background: var(--lavanda);
+                color: white;
+            }
+
+            .mensaje-error:empty {
+                display: none;
+            }
+
+            .mensaje-error {
+                background: #fdf2f2;
+                color: var(--error);
+                padding: 15px;
+                border-radius: 12px;
+                margin-bottom: 25px;
+                border-left: 5px solid var(--error);
+                font-size: 14px;
+                font-weight: 500;
+            }
+
+            .mensaje-error ul {
+                list-style: none;
+                margin: 0;
+                padding: 0;
+            }
+
+            .mensaje-error li {
+                padding: 5px 0;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+            }
+
+            .mensaje-error li::before {
+                content: "\f071";
+                font-family: "Font Awesome 6 Free";
+                font-weight: 900;
+                color: var(--error);
+            }
+
+            .required-mark {
+                color: var(--error);
+                margin-left: 3px;
+            }
+
+            .info-adicional {
+                margin-top: 20px;
+                padding: 15px;
+                background: var(--fondo-suave);
+                border-radius: 12px;
+                font-size: 13px;
+                color: var(--morado-medio);
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                border: 1px solid var(--lavanda);
+            }
+
+            .info-adicional i {
+                font-size: 16px;
+            }
+
+            @media (max-width: 768px) {
+                .content {
+                    padding: 25px;
+                }
+
+                .btn-group {
+                    display: flex;
+                    justify-content: space-between;
+                    gap: 15px;
+                    margin-top: 35px;
+                    padding-top: 20px;
+                    border-top: 1px solid var(--fondo-suave);
+                    flex-wrap: nowrap;
+                }
+            }
+        </style>
+    </wicket:head>
+
+    <div class="page-container">
+        <div class="content">
+            <h1 class="page-title" wicket:id="titulo">Editar Usuario</h1>
+
+            <div wicket:id="mensajeError" class="mensaje-error"></div>
+
+            <form wicket:id="editForm">
+
+                <div class="form-row">
+                    <div class="form-col">
+                        <div class="form-group">
+                            <label><i class="fas fa-user"></i> Nombre(s) <span class="required-mark">*</span></label>
+                            <input type="text" wicket:id="nombre" placeholder="Nombre completo">
+                        </div>
+                    </div>
+                    <div class="form-col">
+                        <div class="form-group">
+                            <label><i class="fas fa-user"></i> Apellido Paterno <span
+                                    class="required-mark">*</span></label>
+                            <input type="text" wicket:id="apellidoPaterno" placeholder="Apellido paterno">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-col">
+                        <div class="form-group">
+                            <label><i class="fas fa-user"></i> Apellido Materno</label>
+                            <input type="text" wicket:id="apellidoMaterno" placeholder="Apellido materno">
+                        </div>
+                    </div>
+                    <div class="form-col">
+                        <div class="form-group">
+                            <label><i class="fas fa-phone"></i> Teléfono <span class="required-mark">*</span></label>
+                            <input type="text" wicket:id="telefono" placeholder="10 dígitos">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-col">
+                        <div class="form-group">
+                            <label><i class="fas fa-calendar-alt"></i> Fecha de Nacimiento <span
+                                    class="required-mark">*</span></label>
+                            <input type="text" wicket:id="fechaNacimiento" class="form-control"
+                                placeholder="DD/MM/AAAA">
+                        </div>
+                    </div>
+                    <div class="form-col">
+                        <div class="form-group">
+                            <label><i class="fas fa-id-badge"></i> Perfil de Usuario <span
+                                    class="required-mark">*</span></label>
+                            <select wicket:id="perfil"></select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-col">
+                        <div class="form-group">
+                            <label><i class="fas fa-toggle-on"></i> Estado <span class="required-mark">*</span></label>
+                            <select wicket:id="estado"></select>
+                        </div>
+                    </div>
+                    <div class="form-col">
+                        <div class="form-group">
+                            <label><i class="fas fa-image"></i> Foto de Perfil (Opcional)</label>
+                            <input type="file" wicket:id="imagen" accept="image/*">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="info-adicional">
+                    <i class="fas fa-sync-alt"></i>
+                    <span>Los cambios realizados se verán reflejados inmediatamente en el listado principal.</span>
+                </div>
+
+                <div class="btn-group">
+                    <button type="submit" wicket:id="btnSiguiente" class="btn-primary">
+                        <i class="fas fa-save"></i> Guardar Cambios
+                    </button>
+                    <a wicket:id="btnCancelar" class="btn-secondary btn-link">
+                        <i class="fas fa-times"></i> Cancelar
+                    </a>
+                </div>
+
+            </form>
+        </div>
+    </div>
+</wicket:extend>

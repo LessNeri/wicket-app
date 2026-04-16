@@ -1,0 +1,506 @@
+<wicket:extend>
+    <wicket:head>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+        <style>
+            :root {
+                --morado-oscuro: #4332af;
+                --morado-medio: #725ec3;
+                --morado-claro: #a18bd7;
+                --lavanda: #d0b8eb;
+                --fondo-suave: #f9f7ff;
+                --blanco: #ffffff;
+                --error: #e74c3c;
+                --exito: #2ecc71;
+                --sombra: rgba(0, 0, 0, 0.08);
+            }
+
+            body {
+                margin: 0;
+                font-family: 'Segoe UI', Arial, sans-serif;
+                background: #f8f9fc;
+            }
+
+            .page {
+                max-width: 1200px;
+                margin: 0 auto;
+                padding: 20px;
+            }
+
+            .content-wrapper {
+                background: var(--blanco);
+                padding: 30px;
+                border-radius: 20px;
+                box-shadow: 0 5px 20px var(--sombra);
+                border: 1px solid var(--lavanda);
+            }
+
+            .header-section {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 25px;
+                flex-wrap: wrap;
+                gap: 15px;
+            }
+
+            .page-title {
+                color: var(--morado-oscuro);
+                margin: 0;
+                font-size: 24px;
+                font-weight: 600;
+            }
+
+            .search-box {
+                position: relative;
+                flex: 1;
+                min-width: 250px;
+                max-width: 400px;
+            }
+
+            .search-box input {
+                width: 100%;
+                padding: 10px 15px 10px 40px;
+                border: 2px solid var(--lavanda);
+                border-radius: 12px;
+                outline: none;
+                transition: all 0.3s;
+                font-size: 14px;
+            }
+
+            .search-box input:focus {
+                border-color: var(--morado-medio);
+                box-shadow: 0 0 0 3px var(--fondo-suave);
+            }
+
+            .search-box i {
+                position: absolute;
+                left: 15px;
+                top: 50%;
+                transform: translateY(-50%);
+                color: var(--morado-claro);
+                pointer-events: none;
+            }
+
+            .btn-nuevo {
+                background: var(--morado-oscuro);
+                color: white !important;
+                padding: 10px 20px;
+                border-radius: 12px;
+                text-decoration: none;
+                font-weight: 600;
+                display: inline-flex;
+                align-items: center;
+                gap: 8px;
+                transition: all 0.3s;
+            }
+
+            .btn-nuevo:hover {
+                background: var(--morado-medio);
+                transform: translateY(-2px);
+            }
+
+            .section-title {
+                color: var(--morado-oscuro);
+                margin: 30px 0 15px 0;
+                font-size: 20px;
+                font-weight: 600;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+            }
+
+            .section-title i {
+                color: var(--morado-medio);
+                font-size: 18px;
+            }
+
+            .table-container {
+                overflow-x: auto;
+                margin-top: 10px;
+            }
+
+            table {
+                width: 100%;
+                border-collapse: collapse;
+                font-size: 14px;
+            }
+
+            thead {
+                background: var(--fondo-suave);
+                color: var(--morado-oscuro);
+            }
+
+            th {
+                padding: 15px;
+                text-align: left;
+                font-weight: 600;
+                border-bottom: 2px solid var(--lavanda);
+            }
+
+            td {
+                padding: 12px 15px;
+                border-bottom: 1px solid #eee;
+                color: #555;
+            }
+
+            tr:hover {
+                background-color: #fcfaff;
+            }
+
+            /* BADGES CON LETRAS DE COLOR Y FONDO CLARITO - IGUAL QUE EN CLIENTES */
+            .badge {
+                display: inline-block;
+                padding: 6px 14px;
+                border-radius: 20px;
+                font-size: 12px;
+                font-weight: 700;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+                text-align: center;
+                min-width: 80px;
+            }
+
+            .badge-activo { 
+                background: #d4fce4;
+                color: #0a8f3c;
+            }
+
+            .badge-inactivo { 
+                background: #ffe0dd;
+                color: #c0392b;
+            }
+
+            .action-links {
+                display: flex;
+                gap: 10px;
+            }
+
+            .btn-action {
+                width: 32px;
+                height: 32px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                border-radius: 8px;
+                transition: all 0.2s;
+                text-decoration: none;
+            }
+
+            .edit { 
+                background: var(--fondo-suave); 
+                color: var(--morado-medio); 
+            }
+            .edit:hover { 
+                background: var(--morado-medio); 
+                color: white; 
+            }
+
+            .delete { 
+                background: #fff5f5; 
+                color: var(--error); 
+            }
+            .delete:hover { 
+                background: var(--error); 
+                color: white; 
+            }
+
+            .no-permiso {
+                text-align: center;
+                padding: 50px;
+                color: var(--error);
+                background: #fff5f5;
+                border-radius: 15px;
+            }
+
+            .mensaje-sin-permiso {
+                text-align: center;
+                padding: 50px;
+                color: var(--error);
+                background: #fff5f5;
+                border-radius: 15px;
+                margin-bottom: 20px;
+            }
+
+            .divider {
+                border: none;
+                height: 2px;
+                background: linear-gradient(to right, transparent, var(--lavanda), transparent);
+                margin: 40px 0;
+            }
+
+            /* CONTENEDOR DEL PAGINADO CENTRADO - IGUAL QUE EN CLIENTES */
+            .pagination-container {
+                margin-top: 30px;
+                padding-top: 20px;
+                border-top: 1px solid var(--lavanda);
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                gap: 15px;
+            }
+            
+            .page-info {
+                background: var(--fondo-suave);
+                padding: 8px 18px;
+                border-radius: 30px;
+                font-size: 13px;
+                font-weight: 500;
+                color: var(--morado-medio);
+                letter-spacing: 0.3px;
+                text-align: center;
+            }
+            
+            .page-info i {
+                margin-right: 5px;
+            }
+            
+            .pagination-controls {
+                display: flex;
+                gap: 12px;
+                justify-content: center;
+            }
+            
+            .btn-pagination {
+                display: inline-flex;
+                align-items: center;
+                gap: 8px;
+                padding: 8px 20px;
+                background: var(--fondo-suave);
+                color: var(--morado-oscuro);
+                border-radius: 30px;
+                text-decoration: none;
+                transition: all 0.2s;
+                cursor: pointer;
+                font-weight: 500;
+                font-size: 13px;
+                border: 1px solid transparent;
+            }
+
+            .btn-pagination:hover {
+                background: var(--lavanda);
+                border-color: var(--morado-claro);
+                transform: translateY(-1px);
+            }
+
+            .btn-pagination[disabled] {
+                opacity: 0.4;
+                cursor: not-allowed;
+                pointer-events: none;
+                background: #e9ecef;
+                color: #6c757d;
+            }
+
+            .search-box-padres {
+                margin-bottom: 15px;
+                position: relative;
+                max-width: 350px;
+            }
+
+            .search-box-padres input {
+                width: 100%;
+                padding: 10px 15px 10px 40px;
+                border: 2px solid var(--lavanda);
+                border-radius: 12px;
+                outline: none;
+                transition: all 0.3s;
+                font-size: 14px;
+            }
+
+            .search-box-padres input:focus {
+                border-color: var(--morado-medio);
+                box-shadow: 0 0 0 3px var(--fondo-suave);
+            }
+
+            .search-box-padres i {
+                position: absolute;
+                left: 15px;
+                top: 50%;
+                transform: translateY(-50%);
+                color: var(--morado-claro);
+                pointer-events: none;
+            }
+
+            div[wicket\:id="feedback"] ul {
+                list-style-type: none;
+                padding: 0;
+                margin: 0 0 20px 0;
+            }
+
+            div[wicket\:id="feedback"] li {
+                padding: 12px 20px;
+                margin-bottom: 10px;
+                border-radius: 12px;
+                font-weight: 600;
+                font-size: 14px;
+            }
+
+            .feedbackPanelSUCCESS {
+                background-color: #e8f8f0;
+                color: var(--exito);
+                border: 1px solid var(--exito);
+            }
+
+            .feedbackPanelERROR {
+                background-color: #fdf2f2;
+                color: var(--error);
+                border: 1px solid var(--error);
+            }
+
+            .feedbackPanelINFO {
+                background-color: var(--fondo-suave);
+                color: var(--morado-oscuro);
+                border: 1px solid var(--lavanda);
+            }
+
+            @media (max-width: 768px) {
+                .page {
+                    padding: 15px;
+                }
+                .content-wrapper {
+                    padding: 20px;
+                }
+                th, td {
+                    padding: 10px;
+                    font-size: 13px;
+                }
+            }
+        </style>
+    </wicket:head>
+
+    <div class="page">
+        <div wicket:id="mensajeSinPermiso" class="mensaje-sin-permiso">
+            <i class="fas fa-lock" style="font-size: 48px; margin-bottom: 15px; display: block;"></i>
+            No tienes permiso para ver esta página.
+        </div>
+
+        <div class="content-wrapper" wicket:id="contenidoPrincipal">
+            <div class="header-section">
+                <h1 class="page-title" wicket:id="titulo">Gestión de Módulos</h1>
+                <a wicket:id="nuevoModulo" class="btn-nuevo">
+                    <i class="fas fa-plus"></i> Nuevo Módulo
+                </a>
+            </div>
+
+            <div wicket:id="feedback"></div>
+
+            <span wicket:id="totalResultados" style="display: none;"></span>
+
+            <div class="header-section" style="margin-top: 0;">
+                <div class="search-box">
+                    <form wicket:id="busquedaForm">
+                        <i class="fas fa-search"></i>
+                        <input type="text" wicket:id="busqueda" placeholder="Buscar submenús por nombre...">
+                    </form>
+                </div>
+            </div>
+
+            <h3 class="section-title">
+                <i class="fas fa-folder-tree"></i>
+                Gestión de Submenús
+            </h3>
+            
+            <div wicket:id="contenedorTablaSubmenus">
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Nombre del Módulo</th>
+                                <th>Menú Asignado</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr wicket:id="moduloList">
+                                <td wicket:id="nombreModulo"></td>
+                                <td wicket:id="menuAsignado"></td>
+                                <td>
+                                    <span wicket:id="estado" class="badge"></span>
+                                </td>
+                                <td class="action-links">
+                                    <a wicket:id="editarModulo" class="btn-action edit" title="Editar">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <a wicket:id="eliminarModulo" class="btn-action delete" title="Eliminar">
+                                        <i class="fas fa-trash-alt"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="pagination-container">
+                    <div class="page-info">
+                        <i class="fas fa-info-circle"></i> <span wicket:id="infoPagina"></span>
+                    </div>
+                    <div class="pagination-controls">
+                        <a wicket:id="btnAnterior" class="btn-pagination">
+                            <i class="fas fa-chevron-left"></i> Anterior
+                        </a>
+                        <a wicket:id="btnSiguiente" class="btn-pagination">
+                            Siguiente <i class="fas fa-chevron-right"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <hr class="divider">
+
+            <h3 class="section-title">
+                <i class="fas fa-list-ul"></i>
+                Gestión de Menús Principales
+            </h3>
+            
+            <form wicket:id="busquedaFormPadres" class="search-box-padres">
+                <i class="fas fa-search"></i>
+                <input type="text" wicket:id="busquedaPadres" placeholder="Buscar menú principal...">
+            </form>
+
+            <div wicket:id="contenedorTablaPadres">
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Nombre del Menú Principal</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr wicket:id="padresList">
+                                <td wicket:id="nombrePadre"></td>
+                                <td>
+                                    <span wicket:id="estadoPadre" class="badge"></span>
+                                </td>
+                                <td class="action-links">
+                                    <a wicket:id="editarPadre" class="btn-action edit" title="Editar">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <a wicket:id="eliminarPadre" class="btn-action delete" title="Eliminar">
+                                        <i class="fas fa-trash-alt"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="pagination-container">
+                    <div class="page-info">
+                        <i class="fas fa-info-circle"></i> <span wicket:id="infoPaginaPadres"></span>
+                    </div>
+                    <div class="pagination-controls">
+                        <a wicket:id="btnAnteriorPadres" class="btn-pagination">
+                            <i class="fas fa-chevron-left"></i> Anterior
+                        </a>
+                        <a wicket:id="btnSiguientePadres" class="btn-pagination">
+                            Siguiente <i class="fas fa-chevron-right"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</wicket:extend>

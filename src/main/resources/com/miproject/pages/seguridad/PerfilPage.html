@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html xmlns:wicket="http://wicket.apache.org">
+<head>
+    <wicket:head>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+        <style>
+            :root {
+                --morado-oscuro: #4332af;
+                --morado-medio: #725ec3;
+                --morado-claro: #a18bd7;
+                --lavanda: #d0b8eb;
+                --fondo-suave: #f9f7ff;
+                --blanco: #ffffff;
+                --error: #e74c3c;
+                --exito: #2ecc71;
+                --sombra: rgba(0, 0, 0, 0.08);
+            }
+
+            .content-wrapper {
+                background: var(--blanco);
+                padding: 30px;
+                border-radius: 20px;
+                box-shadow: 0 5px 20px var(--sombra);
+                border: 1px solid var(--lavanda);
+            }
+
+            .page-title {
+                color: var(--morado-oscuro);
+                margin: 0 0 25px 0;
+                font-size: 24px;
+                font-weight: 600;
+                padding-bottom: 15px;
+                border-bottom: 2px solid var(--fondo-suave);
+            }
+
+            .barra-acciones {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 25px;
+                margin-top: 10px;
+                flex-wrap: wrap;
+                gap: 15px;
+            }
+
+            .search-box {
+                position: relative;
+                flex: 1;
+                min-width: 250px;
+                max-width: 400px;
+            }
+
+            .search-box input {
+                width: 100%;
+                padding: 10px 15px 10px 40px;
+                border: 2px solid var(--lavanda);
+                border-radius: 12px;
+                outline: none;
+                transition: all 0.3s;
+                font-size: 14px;
+            }
+
+            .search-box input:focus {
+                border-color: var(--morado-medio);
+                box-shadow: 0 0 0 3px var(--fondo-suave);
+            }
+
+            .search-box i {
+                position: absolute;
+                left: 15px;
+                top: 50%;
+                transform: translateY(-50%);
+                color: var(--morado-claro);
+                pointer-events: none;
+            }
+
+            .btn-nuevo {
+                background: var(--morado-oscuro);
+                color: white !important;
+                padding: 10px 20px;
+                border-radius: 12px;
+                text-decoration: none;
+                font-weight: 600;
+                display: inline-flex;
+                align-items: center;
+                gap: 8px;
+                transition: all 0.3s;
+            }
+
+            .btn-nuevo:hover {
+                background: var(--morado-medio);
+                transform: translateY(-2px);
+            }
+
+            .table-container {
+                overflow-x: auto;
+                margin-top: 10px;
+                margin-bottom: 25px;
+            }
+
+            table {
+                width: 100%;
+                border-collapse: collapse;
+                font-size: 14px;
+            }
+
+            thead {
+                background: var(--fondo-suave);
+                color: var(--morado-oscuro);
+            }
+
+            th {
+                padding: 15px;
+                text-align: left;
+                font-weight: 600;
+                border-bottom: 2px solid var(--lavanda);
+            }
+
+            td {
+                padding: 12px 15px;
+                border-bottom: 1px solid #eee;
+                color: #555;
+            }
+
+            tr:hover {
+                background-color: #fcfaff;
+            }
+
+            .badge {
+                display: inline-block;
+                padding: 6px 14px;
+                border-radius: 20px;
+                font-size: 12px;
+                font-weight: 700;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+                text-align: center;
+            }
+
+            .badge-admin { 
+                background: #d4fce4;
+                color: #0a8f3c;
+            }
+
+            .badge-usuario { 
+                background: var(--fondo-suave);
+                color: var(--morado-medio);
+            }
+
+            .action-links {
+                display: flex;
+                gap: 10px;
+            }
+
+            .btn-action {
+                width: 32px;
+                height: 32px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                border-radius: 8px;
+                transition: all 0.2s;
+                text-decoration: none;
+            }
+
+            .edit { 
+                background: var(--fondo-suave); 
+                color: var(--morado-medio); 
+            }
+            .edit:hover { 
+                background: var(--morado-medio); 
+                color: white; 
+            }
+
+            .delete { 
+                background: #fff5f5; 
+                color: var(--error); 
+            }
+            .delete:hover { 
+                background: var(--error); 
+                color: white; 
+            }
+
+            .no-permiso {
+                text-align: center;
+                padding: 50px;
+                color: var(--error);
+                background: #fff5f5;
+                border-radius: 15px;
+            }
+
+            .pagination-container {
+                margin-top: 30px;
+                padding-top: 20px;
+                border-top: 1px solid var(--lavanda);
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                gap: 15px;
+            }
+            
+            .page-info {
+                background: var(--fondo-suave);
+                padding: 8px 18px;
+                border-radius: 30px;
+                font-size: 13px;
+                font-weight: 500;
+                color: var(--morado-medio);
+                letter-spacing: 0.3px;
+                text-align: center;
+            }
+            
+            .page-info i {
+                margin-right: 5px;
+            }
+            
+            .pagination-controls {
+                display: flex;
+                gap: 12px;
+                justify-content: center;
+            }
+            
+            .btn-pagination {
+                display: inline-flex;
+                align-items: center;
+                gap: 8px;
+                padding: 8px 20px;
+                background: var(--fondo-suave);
+                color: var(--morado-oscuro);
+                border-radius: 30px;
+                text-decoration: none;
+                transition: all 0.2s;
+                cursor: pointer;
+                font-weight: 500;
+                font-size: 13px;
+                border: 1px solid transparent;
+            }
+
+            .btn-pagination:hover {
+                background: var(--lavanda);
+                border-color: var(--morado-claro);
+                transform: translateY(-1px);
+            }
+
+            div[wicket\:id="feedback"] ul {
+                list-style-type: none;
+                padding: 0;
+                margin: 0 0 25px 0;
+            }
+
+            div[wicket\:id="feedback"] li {
+                padding: 12px 20px;
+                margin-bottom: 10px;
+                border-radius: 12px;
+                font-weight: 600;
+                font-size: 14px;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+            }
+
+            .feedbackPanelSUCCESS {
+                background-color: #e8f8f0;
+                color: var(--exito);
+                border: 1px solid var(--exito);
+                border-left: 5px solid var(--exito);
+            }
+
+            .feedbackPanelERROR {
+                background-color: #fdf2f2;
+                color: var(--error);
+                border: 1px solid var(--error);
+                border-left: 5px solid var(--error);
+            }
+
+            .feedbackPanelINFO {
+                background-color: var(--fondo-suave);
+                color: var(--morado-oscuro);
+                border: 1px solid var(--lavanda);
+                border-left: 5px solid var(--morado-claro);
+            }
+
+            /* Íconos dentro de los mensajes de feedback */
+            .feedbackPanelSUCCESS::before {
+                content: "\f00c";
+                font-family: "Font Awesome 6 Free";
+                font-weight: 900;
+                font-size: 16px;
+            }
+
+            .feedbackPanelERROR::before {
+                content: "\f071";
+                font-family: "Font Awesome 6 Free";
+                font-weight: 900;
+                font-size: 16px;
+            }
+
+            .feedbackPanelINFO::before {
+                content: "\f05a";
+                font-family: "Font Awesome 6 Free";
+                font-weight: 900;
+                font-size: 16px;
+            }
+        </style>
+    </wicket:head>
+</head>
+<body>
+
+<wicket:extend>
+    <div class="content-wrapper">
+        <h1 class="page-title" wicket:id="titulo">Gestión de Perfiles</h1>
+
+        <div class="barra-acciones">
+            <div class="search-box">
+                <form wicket:id="busquedaForm">
+                    <i class="fas fa-search"></i>
+                    <input type="text" wicket:id="busqueda" placeholder="Buscar por nombre de perfil...">
+                </form>
+            </div>
+            <a wicket:id="nuevoPerfil" class="btn-nuevo">
+                <i class="fas fa-plus"></i> Nuevo Perfil
+            </a>
+        </div>
+
+        <div wicket:id="feedback"></div>
+
+        <div wicket:id="mensajeSinPermiso" class="no-permiso" style="display: none;">
+            <i class="fas fa-lock" style="font-size: 48px; margin-bottom: 15px; display: block;"></i>
+            No tienes permiso para ver esta página.
+        </div>
+
+        <div wicket:id="tablaContainer">
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Nombre del Perfil</th>
+                            <th>Rol</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr wicket:id="perfilList">
+                            <td wicket:id="nombrePerfil"></td>
+                            <td>
+                                <span wicket:id="rol" class="badge"></span>
+                            </td>
+                            <td class="action-links">
+                                <a wicket:id="editarPerfil" class="btn-action edit" title="Editar">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <a wicket:id="eliminarPerfil" class="btn-action delete" title="Eliminar">
+                                    <i class="fas fa-trash-alt"></i>
+                                </a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="pagination-container">
+            <div class="page-info">
+                <i class="fas fa-list"></i> 
+                <span wicket:id="infoPagina">Mostrando 1 a 5 de 25 registros</span>
+            </div>
+            <div class="pagination-controls">
+                <a class="btn-pagination" id="btnAnterior" onclick="paginaAnterior()">
+                    <i class="fas fa-chevron-left"></i> Anterior
+                </a>
+                <a class="btn-pagination" id="btnSiguiente" onclick="paginaSiguiente()">
+                    Siguiente <i class="fas fa-chevron-right"></i>
+                </a>
+            </div>
+        </div>
+        
+        <span wicket:id="totalResultados" style="display:none;"></span>
+    </div>
+
+    <script>
+        let paginaActual = 1;
+        let totalPaginas = 1;
+
+        function paginaAnterior() {
+            if (paginaActual > 1) {
+                paginaActual--;
+                window.location.href = '?pagina=' + paginaActual;
+            }
+        }
+
+        function paginaSiguiente() {
+            if (paginaActual < totalPaginas) {
+                paginaActual++;
+                window.location.href = '?pagina=' + paginaActual;
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const totalResultados = parseInt(document.querySelector('[wicket\\:id="totalResultados"]')?.textContent || '0');
+            totalPaginas = Math.ceil(totalResultados / 5);
+            
+            const infoPaginaSpan = document.querySelector('[wicket\\:id="infoPagina"]');
+            if (infoPaginaSpan && totalResultados > 0) {
+                const desde = (paginaActual - 1) * 5 + 1;
+                const hasta = Math.min(paginaActual * 5, totalResultados);
+                infoPaginaSpan.textContent = `Mostrando ${desde} a ${hasta} de ${totalResultados} registros`;
+            }
+            
+            document.querySelectorAll('[wicket\\:id="rol"]').forEach(function(element) {
+                const rol = element.textContent.trim();
+                if (rol === 'ADMINISTRADOR') {
+                    element.classList.add('badge-admin');
+                } else {
+                    element.classList.add('badge-usuario');
+                }
+            });
+        });
+    </script>
+
+</wicket:extend>
+</body>
+</html>

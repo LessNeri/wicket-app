@@ -9,31 +9,49 @@ import org.apache.wicket.protocol.http.WebApplication;
 import org.apache.wicket.request.resource.AbstractResource;
 import org.apache.wicket.request.resource.ResourceReference;
 
+import com.miproject.filters.JWTAuthenticationFilter;
+import com.miproject.pages.LoginPage;
+import com.miproject.pages.principal.ClientePage;
+import com.miproject.pages.principal.CrearClientePage;
+import com.miproject.pages.principal.EditarClientePage;
+import com.miproject.pages.principal.EliminarClientePage;
+import com.miproject.pages.seguridad.CrearUsuarioPage;
+import com.miproject.pages.seguridad.EditarUsuarioPage;
+import com.miproject.pages.seguridad.ModuloPage;
+import com.miproject.pages.seguridad.PerfilPage;
+import com.miproject.pages.seguridad.PermisoPage;
+import com.miproject.pages.seguridad.UsuarioPage;
+
 public class WicketApplication extends WebApplication {
 
     private File uploadDir;
 
     @Override
     public Class<? extends Page> getHomePage() {
-        return HomePage.class;
+        return LoginPage.class;
     }
 
     @Override
     protected void init() {
         super.init();
 
-        mountPage("/gestion-usuarios", GestionUsuariosPage.class);
-        mountPage("/registrar", RegistrarUsuarioPage.class);
-        mountPage("/editar", EditarUsuarioPage.class);
-        mountPage("/eliminar", EliminarUsuarioPage.class);
+        getRequestCycleListeners().add(new JWTAuthenticationFilter());
 
-        mountPage("/crud", CrudPage.class);
+        mountPage("/login", LoginPage.class);
+        mountPage("/home", HomePage.class);
+        mountPage("/perfil", PerfilPage.class);
+        mountPage("/modulo", ModuloPage.class);
+        mountPage("/permisos", PermisoPage.class);
+        mountPage("/usuario", UsuarioPage.class);
+        mountPage("/crear-usuario", CrearUsuarioPage.class);
+        mountPage("/editar-usuario", EditarUsuarioPage.class);
 
-        mountPage("/api/usuarios", UsuariosApiPage.class);
-
+        mountPage("/clientes", ClientePage.class);
+        mountPage("/crear-cliente", CrearClientePage.class);
+        mountPage("/editar-cliente", EditarClientePage.class);
+        mountPage("/eliminar-cliente", EliminarClientePage.class);
         mountPage("/error/404", Error404Page.class);
 
-        // ================= CONFIGURACIÓN GENERAL =================
         getDebugSettings().setComponentUseCheck(false);
         getDebugSettings().setAjaxDebugModeEnabled(false);
         getCspSettings().blocking().disabled();
@@ -41,17 +59,12 @@ public class WicketApplication extends WebApplication {
         getMarkupSettings().setDefaultMarkupEncoding("UTF-8");
         getRequestCycleSettings().setResponseRequestEncoding("UTF-8");
 
-        // ================= PÁGINAS DE ERROR PERSONALIZADAS =================
-        // Sesión expirada
         getApplicationSettings().setPageExpiredErrorPage(Error404Page.class);
 
-        // Error interno (500)
         getApplicationSettings().setInternalErrorPage(Error404Page.class);
 
-        // Acceso no permitido
         getApplicationSettings().setAccessDeniedPage(Error404Page.class);
 
-        // ================= DIRECTORIO DE SUBIDAS =================
         String path = System.getenv("UPLOAD_DIR");
         if (path == null || path.isBlank()) {
             throw new IllegalStateException("UPLOAD_DIR no está configurada");
@@ -60,7 +73,6 @@ public class WicketApplication extends WebApplication {
         uploadDir = new File(path);
         uploadDir.mkdirs();
 
-        // ================= RECURSOS ESTÁTICOS =================
         mountResource(
             "uploads/carrusel/${file}",
             new ResourceReference("carruselStatic") {

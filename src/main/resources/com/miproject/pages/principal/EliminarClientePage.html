@@ -1,0 +1,212 @@
+<wicket:extend>
+    <wicket:head>
+        <style>
+            :root {
+                --morado-oscuro: #4332af;
+                --morado-medio: #725ec3;
+                --morado-claro: #a18bd7;
+                --lavanda: #d0b8eb;
+                --fondo-suave: #f9f7ff;
+                --blanco: #ffffff;
+                --error: #e74c3c;
+                --error-suave: #fdf2f2;
+                --sombra: rgba(0, 0, 0, 0.08);
+            }
+
+            .page-container {
+                max-width: 600px;
+                margin: 0 auto;
+                padding: 20px;
+            }
+
+            .delete-card {
+                background: var(--blanco);
+                padding: 40px;
+                border-radius: 20px;
+                box-shadow: 0 10px 30px var(--sombra);
+                border: 2px solid var(--lavanda);
+                text-align: center;
+            }
+
+            .page-title {
+                color: var(--morado-oscuro);
+                margin-bottom: 25px;
+                font-size: 24px;
+                font-weight: 700;
+            }
+
+            .warning-box {
+                background-color: var(--error-suave);
+                border-left: 5px solid var(--error);
+                padding: 20px;
+                margin-bottom: 30px;
+                border-radius: 8px;
+                display: flex;
+                align-items: center;
+                gap: 15px;
+                text-align: left;
+            }
+
+            .warning-box i {
+                font-size: 30px;
+                color: var(--error);
+            }
+
+            .warning-text h4 {
+                margin: 0;
+                color: #c0392b;
+                font-size: 16px;
+                font-weight: 700;
+            }
+
+            .warning-text p {
+                margin: 5px 0 0;
+                font-size: 14px;
+                color: #666;
+            }
+
+            /* Visualización de Datos */
+            .info-display {
+                background: var(--fondo-suave);
+                padding: 20px;
+                border-radius: 12px;
+                margin-bottom: 30px;
+                text-align: left;
+            }
+
+            .info-item {
+                margin-bottom: 15px;
+                display: flex;
+                flex-direction: column;
+                border-bottom: 1px solid var(--lavanda);
+                padding-bottom: 8px;
+            }
+
+            .info-item:last-child {
+                margin-bottom: 0;
+                border-bottom: none;
+            }
+
+            .info-label {
+                font-size: 12px;
+                text-transform: uppercase;
+                letter-spacing: 1px;
+                color: var(--morado-medio);
+                font-weight: 700;
+            }
+
+            .info-value {
+                font-size: 16px;
+                color: #333;
+                font-weight: 500;
+                margin-top: 4px;
+            }
+
+            /* Botones */
+            .btn-group {
+                display: flex;
+                gap: 15px;
+            }
+
+            .btn-delete {
+                flex: 1;
+                background: var(--error);
+                color: white;
+                border: none;
+                padding: 15px;
+                border-radius: 12px;
+                font-size: 16px;
+                font-weight: 600;
+                cursor: pointer;
+                transition: all 0.3s;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 10px;
+            }
+
+            .btn-delete:hover {
+                background: #c0392b;
+                transform: translateY(-2px);
+                box-shadow: 0 5px 15px rgba(231, 76, 60, 0.3);
+            }
+
+            .btn-cancel {
+                flex: 1;
+                background: var(--blanco);
+                color: var(--morado-oscuro);
+                text-decoration: none;
+                padding: 15px;
+                border-radius: 12px;
+                text-align: center;
+                font-weight: 600;
+                border: 1px solid var(--lavanda);
+                transition: all 0.3s;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 10px;
+            }
+
+            .btn-cancel:hover {
+                background: var(--lavanda);
+                color: white;
+            }
+
+            /* Feedback Panel */
+            .feedbackPanel {
+                list-style: none;
+                padding: 0;
+                margin-bottom: 20px;
+            }
+            .feedbackPanelERROR {
+                color: var(--error);
+                background: var(--error-suave);
+                padding: 10px;
+                border-radius: 8px;
+            }
+        </style>
+    </wicket:head>
+
+    <div class="page-container">
+        <div class="delete-card">
+            <h1 class="page-title" wicket:id="titulo">Eliminar Cliente</h1>
+
+            <div wicket:id="feedback"></div>
+
+            <div class="warning-box">
+                <i class="fas fa-exclamation-triangle"></i>
+                <div class="warning-text">
+                    <h4>¿Está completamente seguro?</h4>
+                    <p>Esta acción eliminará permanentemente los datos del cliente y no se puede deshacer.</p>
+                </div>
+            </div>
+
+            <div class="info-display">
+                <div class="info-item">
+                    <span class="info-label">Código</span>
+                    <span class="info-value" wicket:id="lblCodigo"></span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Nombre del Cliente</span>
+                    <span class="info-value" wicket:id="lblNombre"></span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Empresa</span>
+                    <span class="info-value" wicket:id="lblEmpresa"></span>
+                </div>
+            </div>
+
+            <form wicket:id="formEliminar">
+                <div class="btn-group">
+                    <button type="submit" class="btn-delete">
+                        <i class="fas fa-trash-alt"></i> Confirmar Eliminación
+                    </button>
+                    <a wicket:id="btnCancelar" class="btn-cancel">
+                        <i class="fas fa-times"></i> Cancelar
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</wicket:extend>

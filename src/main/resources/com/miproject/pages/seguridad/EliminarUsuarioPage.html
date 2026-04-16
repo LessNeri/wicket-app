@@ -1,0 +1,291 @@
+<html xmlns:wicket="http://wicket.apache.org">
+<wicket:head>
+    <title>Eliminar Usuario</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        :root {
+            --morado-oscuro: #4332af;
+            --morado-medio: #725ec3;
+            --morado-claro: #a18bd7;
+            --lavanda: #d0b8eb;
+            --fondo-suave: #f9f7ff;
+            --blanco: #ffffff;
+            --error: #e74c3c;
+            --exito: #2ecc71;
+            --warning: #f39c12;
+            --sombra: rgba(0, 0, 0, 0.08);
+        }
+
+        .page {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .content {
+            background: var(--blanco);
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px var(--sombra);
+            border: 1px solid var(--lavanda);
+            text-align: center;
+        }
+
+        .warning-icon {
+            font-size: 56px;
+            color: var(--warning);
+            margin-bottom: 20px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .page-title {
+            color: var(--error);
+            margin-top: 0;
+            margin-bottom: 20px;
+            font-size: 28px;
+            font-weight: 700;
+            border-bottom: 2px solid var(--fondo-suave);
+            padding-bottom: 15px;
+        }
+
+        p {
+            color: #666;
+            font-size: 16px;
+            margin-bottom: 25px;
+        }
+
+        .info-usuario {
+            background: var(--fondo-suave);
+            padding: 20px;
+            border-radius: 15px;
+            margin: 25px 0;
+            text-align: left;
+            border: 1px solid var(--lavanda);
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--lavanda);
+        }
+
+        .info-row:last-child {
+            border-bottom: none;
+        }
+
+        .info-label {
+            font-weight: 600;
+            color: var(--morado-oscuro);
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .info-label i {
+            color: var(--morado-claro);
+            font-size: 14px;
+        }
+
+        .info-value {
+            color: #333;
+            font-weight: 500;
+            font-size: 15px;
+        }
+
+        .mensaje-advertencia {
+            background: #fff3cd;
+            border-left: 5px solid var(--warning);
+            padding: 15px;
+            border-radius: 12px;
+            margin: 20px 0;
+            color: #856404;
+            text-align: left;
+            font-size: 14px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .mensaje-advertencia::before {
+            content: "\f05a";
+            font-family: "Font Awesome 6 Free";
+            font-weight: 900;
+            color: var(--warning);
+            font-size: 18px;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid var(--fondo-suave);
+            flex-wrap: wrap;
+        }
+
+        a.btn-confirmar, a.btn-cancelar {
+            flex: 1;
+            padding: 15px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            text-align: center;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .btn-confirmar {
+            background: var(--error);
+            color: white;
+            border: none;
+        }
+
+        .btn-confirmar:hover {
+            background: #c0392b;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(231, 76, 60, 0.3);
+        }
+
+        .btn-cancelar {
+            background: var(--fondo-suave);
+            color: var(--morado-oscuro);
+            border: 1px solid var(--lavanda);
+        }
+
+        .btn-cancelar:hover {
+            background: var(--lavanda);
+            color: white;
+        }
+
+        .feedback-panel {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 12px;
+        }
+
+        div[wicket\:id="feedback"] ul {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        div[wicket\:id="feedback"] li {
+            padding: 12px 20px;
+            margin-bottom: 10px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .feedbackPanelSUCCESS {
+            background-color: #e8f8f0;
+            color: var(--exito);
+            border: 1px solid var(--exito);
+        }
+
+        .feedbackPanelERROR {
+            background-color: #fdf2f2;
+            color: var(--error);
+            border: 1px solid var(--error);
+        }
+
+        .feedbackPanelINFO {
+            background-color: var(--fondo-suave);
+            color: var(--morado-oscuro);
+            border: 1px solid var(--lavanda);
+        }
+
+        @media (max-width: 768px) {
+            .page {
+                padding: 15px;
+            }
+            .content {
+                padding: 25px;
+            }
+            .info-row {
+                flex-direction: column;
+                gap: 5px;
+            }
+            .info-value {
+                text-align: left;
+            }
+            .btn-group {
+                flex-direction: column;
+            }
+        }
+    </style>
+</wicket:head>
+
+<wicket:extend>
+    <div class="page">
+        <div class="content">
+            <div class="warning-icon">
+                <i class="fas fa-exclamation-triangle"></i>
+            </div>
+            <h1 class="page-title" wicket:id="titulo">Eliminar Usuario</h1>
+
+            <p>¿Está seguro de eliminar el siguiente usuario?</p>
+
+            <div class="info-usuario">
+                <div class="info-row">
+                    <span class="info-label">
+                        <i class="fas fa-user"></i>
+                        Nombre:
+                    </span>
+                    <span class="info-value" wicket:id="nombreUsuario"></span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">
+                        <i class="fas fa-envelope"></i>
+                        Correo:
+                    </span>
+                    <span class="info-value" wicket:id="correo"></span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">
+                        <i class="fas fa-phone"></i>
+                        Teléfono:
+                    </span>
+                    <span class="info-value" wicket:id="telefono"></span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">
+                        <i class="fas fa-toggle-on"></i>
+                        Estado:
+                    </span>
+                    <span class="info-value" wicket:id="estado"></span>
+                </div>
+            </div>
+
+            <div wicket:id="mensajeAdvertencia" class="mensaje-advertencia"></div>
+
+            <div class="btn-group">
+                <a wicket:id="confirmar" class="btn-confirmar" href="#">
+                    <i class="fas fa-trash-alt"></i> Sí, eliminar
+                </a>
+                
+                <a wicket:id="cancelar" class="btn-cancelar" href="#">
+                    <i class="fas fa-times"></i> Cancelar
+                </a>
+            </div>
+            <div wicket:id="feedback" class="feedback-panel"></div>
+        </div>
+    </div>
+</wicket:extend>
+</html>

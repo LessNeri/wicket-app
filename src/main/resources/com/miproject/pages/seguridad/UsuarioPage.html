@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html xmlns:wicket="http://wicket.apache.org">
+<body>
+<wicket:extend>
+
+    <wicket:head>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+        <style>
+            :root {
+                --morado-oscuro: #4332af;
+                --morado-medio: #725ec3;
+                --morado-claro: #a18bd7;
+                --lavanda: #d0b8eb;
+                --fondo-suave: #f9f7ff;
+                --blanco: #ffffff;
+                --error: #e74c3c;
+                --exito: #2ecc71;
+                --sombra: rgba(0, 0, 0, 0.08);
+            }
+            
+            .page {
+                max-width: 1200px;
+                margin: 0 auto;
+                padding: 20px;
+            }
+            
+            .content {
+                background: var(--blanco);
+                padding: 30px;
+                border-radius: 20px;
+                box-shadow: 0 5px 20px var(--sombra);
+                border: 1px solid var(--lavanda);
+            }
+            
+            .page-title {
+                color: var(--morado-oscuro);
+                margin: 0 0 25px 0;
+                font-size: 24px;
+                font-weight: 600;
+                padding-bottom: 15px;
+                border-bottom: 2px solid var(--fondo-suave);
+            }
+            
+            .barra-acciones {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 25px;
+                margin-top: 10px;
+                flex-wrap: wrap;
+                gap: 15px;
+            }
+            
+            .search-box {
+                position: relative;
+                flex: 1;
+                min-width: 250px;
+                max-width: 400px;
+            }
+            
+            .search-box input {
+                width: 100%;
+                padding: 10px 15px 10px 40px;
+                border: 2px solid var(--lavanda);
+                border-radius: 12px;
+                outline: none;
+                transition: all 0.3s;
+                font-size: 14px;
+            }
+            
+            .search-box input:focus {
+                border-color: var(--morado-medio);
+                box-shadow: 0 0 0 3px var(--fondo-suave);
+            }
+            
+            .search-box i {
+                position: absolute;
+                left: 15px;
+                top: 50%;
+                transform: translateY(-50%);
+                color: var(--morado-claro);
+                pointer-events: none;
+            }
+            
+            .btn-nuevo {
+                background: var(--morado-oscuro);
+                color: white !important;
+                padding: 10px 20px;
+                border-radius: 12px;
+                text-decoration: none;
+                font-weight: 600;
+                display: inline-flex;
+                align-items: center;
+                gap: 8px;
+                transition: all 0.3s;
+            }
+            
+            .btn-nuevo:hover {
+                background: var(--morado-medio);
+                transform: translateY(-2px);
+            }
+            
+            .tabla-container {
+                overflow-x: auto;
+                margin-top: 10px;
+                margin-bottom: 25px;
+            }
+            
+            table {
+                width: 100%;
+                border-collapse: collapse;
+                font-size: 14px;
+            }
+            
+            thead {
+                background: var(--fondo-suave);
+                color: var(--morado-oscuro);
+            }
+            
+            th {
+                padding: 15px;
+                text-align: left;
+                font-weight: 600;
+                border-bottom: 2px solid var(--lavanda);
+            }
+            
+            td {
+                padding: 12px 15px;
+                border-bottom: 1px solid #eee;
+                color: #555;
+                vertical-align: middle;
+            }
+            
+            tr:hover {
+                background-color: #fcfaff;
+            }
+            
+            .imagen-usuario {
+                width: 40px;
+                height: 40px;
+                border-radius: 50%;
+                object-fit: cover;
+                border: 2px solid var(--lavanda);
+            }
+            
+            .badge {
+                display: inline-block;
+                padding: 6px 14px;
+                border-radius: 20px;
+                font-size: 12px;
+                font-weight: 700;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+                text-align: center;
+            }
+            
+            .badge-activo {
+                background: #d4fce4;
+                color: #0a8f3c;
+            }
+            
+            .badge-inactivo {
+                background: #ffe0dd;
+                color: #c0392b;
+            }
+            
+            .acciones-cell {
+                white-space: nowrap;
+            }
+            
+            .acciones-cell a {
+                text-decoration: none;
+                margin-right: 15px;
+                font-size: 18px;
+                transition: all 0.2s ease;
+            }
+            
+            .icono-editar {
+                color: var(--morado-medio);
+            }
+            
+            .icono-editar:hover {
+                color: var(--morado-oscuro);
+            }
+            
+            .icono-eliminar {
+                color: var(--error);
+            }
+            
+            .icono-eliminar:hover {
+                color: #c0392b;
+            }
+            
+            .mensaje-sin-permiso {
+                text-align: center;
+                padding: 50px;
+                color: var(--error);
+                background: #fff5f5;
+                border-radius: 15px;
+                margin-bottom: 20px;
+            }
+            
+            .pagination-container {
+                margin-top: 30px;
+                padding-top: 20px;
+                border-top: 1px solid var(--lavanda);
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                gap: 15px;
+            }
+            
+            .page-info {
+                background: var(--fondo-suave);
+                padding: 8px 18px;
+                border-radius: 30px;
+                font-size: 13px;
+                font-weight: 500;
+                color: var(--morado-medio);
+                letter-spacing: 0.3px;
+                text-align: center;
+            }
+            
+            .page-info i {
+                margin-right: 5px;
+            }
+            
+            .pagination-controls {
+                display: flex;
+                gap: 12px;
+                justify-content: center;
+            }
+            
+            .btn-pagina {
+                display: inline-flex;
+                align-items: center;
+                gap: 8px;
+                padding: 8px 20px;
+                background: var(--fondo-suave);
+                color: var(--morado-oscuro);
+                border-radius: 30px;
+                text-decoration: none;
+                transition: all 0.2s;
+                cursor: pointer;
+                font-weight: 500;
+                font-size: 13px;
+                border: 1px solid transparent;
+            }
+            
+            .btn-pagina:hover {
+                background: var(--lavanda);
+                border-color: var(--morado-claro);
+                transform: translateY(-1px);
+            }
+            
+            .feedback-exito {
+                margin-bottom: 20px;
+            }
+            
+            .feedback-exito ul {
+                list-style: none;
+                padding: 12px 20px;
+                margin: 0;
+                background-color: #e8f8f0;
+                color: var(--exito);
+                border: 1px solid var(--exito);
+                border-radius: 12px;
+                border-left: 5px solid var(--exito);
+                font-weight: 500;
+            }
+            
+            .feedback-exito ul li {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+            }
+            
+            .feedback-exito ul li::before {
+                content: "\f00c";
+                font-family: "Font Awesome 6 Free";
+                font-weight: 900;
+            }
+            
+            .feedback-exito:empty {
+                display: none;
+            }
+            
+            div[wicket\:id="feedback"] ul {
+                list-style-type: none;
+                padding: 0;
+                margin: 0;
+            }
+            
+            @media (max-width: 768px) {
+                .page {
+                    padding: 15px;
+                }
+                .content {
+                    padding: 20px;
+                }
+                th, td {
+                    padding: 8px;
+                    font-size: 13px;
+                }
+            }
+        </style>
+    </wicket:head>
+
+    <div class="page">
+        <span wicket:id="totalResultados" style="display: none;"></span>
+
+        <div class="content">
+            <h1 class="page-title" wicket:id="titulo">Gestión de Usuarios</h1>
+
+            <div wicket:id="feedback" class="feedback-exito"></div>
+
+            <div class="barra-acciones">
+                <div class="search-box">
+                    <form wicket:id="busquedaForm">
+                        <i class="fas fa-search"></i>
+                        <input type="text" wicket:id="busqueda" placeholder="Buscar por nombre, correo o teléfono...">
+                    </form>
+                </div>
+                <a wicket:id="nuevoUsuario" class="btn-nuevo">
+                    <i class="fas fa-plus"></i> Nuevo Usuario
+                </a>
+            </div>
+
+            <div class="tabla-container" wicket:id="tablaContainer">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Imagen</th>
+                            <th>Nombre</th>
+                            <th>Correo</th>
+                            <th>Perfil</th>
+                            <th>Celular</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr wicket:id="usuarioList">
+                            <td><img wicket:id="imagen" class="imagen-usuario" alt="Foto de perfil"></td>
+                            <td wicket:id="nombreCompleto"></td>
+                            <td wicket:id="correo"></td>
+                            <td wicket:id="perfil"></td>
+                            <td wicket:id="celular"></td>
+                            <td wicket:id="estado"></td>
+                            <td class="acciones-cell">
+                                <a wicket:id="editarUsuario" class="icono-editar"><i class="fas fa-edit"></i></a>
+                                <a wicket:id="eliminarUsuario" class="icono-eliminar"><i class="fas fa-trash-alt"></i></a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="pagination-container" wicket:id="paginacionContainer">
+                <div class="page-info">
+                    <i class="fas fa-list"></i>
+                    <span wicket:id="infoPagina"></span>
+                </div>
+                <div class="pagination-controls">
+                    <a wicket:id="btnAnterior" class="btn-pagina">
+                        <i class="fas fa-chevron-left"></i> Anterior
+                    </a>
+                    <a wicket:id="btnSiguiente" class="btn-pagina">
+                        Siguiente <i class="fas fa-chevron-right"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div wicket:id="mensajeSinPermiso" class="mensaje-sin-permiso">
+            <i class="fas fa-lock" style="font-size: 48px; margin-bottom: 15px; display: block;"></i>
+            No tienes permiso para ver esta página.
+        </div>                  
+    </div>
+
+    <script>
+        let paginaActual = 1;
+        let totalPaginas = 1;
+
+        function paginaAnterior() {
+            if (paginaActual > 1) {
+                paginaActual--;
+                window.location.href = '?pagina=' + paginaActual;
+            }
+        }
+
+        function paginaSiguiente() {
+            if (paginaActual < totalPaginas) {
+                paginaActual++;
+                window.location.href = '?pagina=' + paginaActual;
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const totalResultadosStr = document.querySelector('[wicket\\:id="totalResultados"]')?.textContent;
+            const totalResultados = parseInt(totalResultadosStr || '0');
+            
+            const urlParams = new URLSearchParams(window.location.search);
+            paginaActual = parseInt(urlParams.get('pagina') || '1');
+            
+            totalPaginas = Math.ceil(totalResultados / 5);
+            
+            const infoPagina = document.querySelector('[wicket\\:id="infoPagina"]');
+            if (infoPagina && totalResultados > 0) {
+                const desde = (paginaActual - 1) * 5 + 1;
+                const hasta = Math.min(paginaActual * 5, totalResultados);
+                infoPagina.textContent = `Mostrando ${desde} a ${hasta} de ${totalResultados} registros`;
+            } else if (infoPagina) {
+                infoPagina.textContent = `Mostrando 0 registros`;
+            }
+            
+            // Aplicar badges a los estados
+            document.querySelectorAll('[wicket\\:id="estado"]').forEach(function(element) {
+                const estado = element.textContent.trim();
+                element.classList.add('badge');
+                if (estado === 'Activo' || estado === 'ACTIVO') {
+                    element.classList.add('badge-activo');
+                } else {
+                    element.classList.add('badge-inactivo');
+                }
+            });
+        });
+    </script>
+</wicket:extend>
+</body>
+</html>

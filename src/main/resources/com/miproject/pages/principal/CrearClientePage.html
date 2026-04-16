@@ -1,0 +1,231 @@
+<wicket:extend>
+    <wicket:head>
+        <style>
+            :root {
+                --morado-oscuro: #4332af;
+                --morado-medio: #725ec3;
+                --morado-claro: #a18bd7;
+                --lavanda: #d0b8eb;
+                --fondo-suave: #f9f7ff;
+                --blanco: #ffffff;
+                --error: #e74c3c;
+                --sombra: rgba(0, 0, 0, 0.08);
+            }
+
+            .page-container {
+                max-width: 850px;
+                margin: 0 auto;
+                padding: 20px;
+            }
+
+            .content-card {
+                background: var(--blanco);
+                padding: 40px;
+                border-radius: 20px;
+                box-shadow: 0 10px 30px var(--sombra);
+                border: 1px solid var(--lavanda);
+            }
+
+            .page-title {
+                color: var(--morado-oscuro);
+                margin-bottom: 30px;
+                font-size: 26px;
+                font-weight: 700;
+                text-align: center;
+                border-bottom: 2px solid var(--fondo-suave);
+                padding-bottom: 15px;
+            }
+
+            /* Estructura de Formulario */
+            .form-row {
+                display: flex;
+                gap: 25px;
+                margin-bottom: 20px;
+                flex-wrap: wrap;
+            }
+
+            .form-col {
+                flex: 1;
+                min-width: 300px;
+            }
+
+            .form-group {
+                margin-bottom: 15px;
+            }
+
+            .form-group label {
+                display: block;
+                margin-bottom: 8px;
+                font-weight: 600;
+                color: #555;
+                font-size: 14px;
+            }
+
+            .input-container {
+                position: relative;
+            }
+
+            .input-container i {
+                position: absolute;
+                left: 15px;
+                top: 50%;
+                transform: translateY(-50%);
+                color: var(--morado-claro);
+            }
+
+            input[type="text"], input[type="tel"] {
+                width: 100%;
+                padding: 12px 15px 12px 45px;
+                border: 2px solid var(--lavanda);
+                border-radius: 12px;
+                font-size: 15px;
+                transition: all 0.3s ease;
+                box-sizing: border-box;
+            }
+
+            input:focus {
+                outline: none;
+                border-color: var(--morado-medio);
+                box-shadow: 0 0 0 4px var(--fondo-suave);
+            }
+
+            /* Feedback Panel Estilizado */
+            .feedbackPanel {
+                list-style: none;
+                padding: 0;
+                margin-bottom: 25px;
+            }
+
+            .feedbackPanelERROR {
+                background: #fdf2f2;
+                color: var(--error);
+                padding: 15px;
+                border-radius: 12px;
+                border-left: 5px solid var(--error);
+                font-size: 14px;
+                font-weight: 500;
+            }
+
+            /* Botones */
+            .btn-group {
+                display: flex;
+                gap: 15px;
+                margin-top: 35px;
+                padding-top: 20px;
+                border-top: 1px solid var(--fondo-suave);
+            }
+
+            .btn-save {
+                flex: 2;
+                background: var(--morado-oscuro);
+                color: white;
+                border: none;
+                padding: 15px;
+                border-radius: 12px;
+                font-size: 16px;
+                font-weight: 600;
+                cursor: pointer;
+                transition: all 0.3s;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 10px;
+            }
+
+            .btn-save:hover {
+                background: var(--morado-medio);
+                transform: translateY(-2px);
+                box-shadow: 0 5px 15px rgba(67, 50, 175, 0.3);
+            }
+
+            .btn-cancel {
+                flex: 1;
+                background: var(--fondo-suave);
+                color: var(--morado-oscuro);
+                text-decoration: none;
+                padding: 15px;
+                border-radius: 12px;
+                text-align: center;
+                font-weight: 600;
+                border: 1px solid var(--lavanda);
+                transition: all 0.3s;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 10px;
+            }
+
+            .btn-cancel:hover {
+                background: var(--lavanda);
+                color: white;
+            }
+
+            .required-mark {
+                color: var(--error);
+                margin-left: 3px;
+            }
+
+            @media (max-width: 600px) {
+                .form-col { min-width: 100%; }
+                .btn-group { flex-direction: column; }
+            }
+        </style>
+    </wicket:head>
+
+    <div class="page-container">
+        <div class="content-card">
+            <h1 class="page-title" wicket:id="titulo">Registrar Nuevo Cliente</h1>
+
+            <div wicket:id="feedback"></div>
+
+            <form wicket:id="formCrear">
+                <div class="form-row">
+                    <div class="form-col">
+                        <div class="form-group">
+                            <label>Código del Cliente <span class="required-mark">*</span></label>
+                            <div class="input-container">
+                                <i class="fas fa-id-card"></i>
+                                <input type="text" wicket:id="strCodigoCliente" placeholder="Ej: CLT-001">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Nombre Completo <span class="required-mark">*</span></label>
+                            <div class="input-container">
+                                <i class="fas fa-user"></i>
+                                <input type="text" wicket:id="strNombre" placeholder="Nombre del cliente o razón social">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-col">
+                        <div class="form-group">
+                            <label>Teléfono de Contacto <span class="required-mark">*</span></label>
+                            <div class="input-container">
+                                <i class="fas fa-phone"></i>
+                                <input type="text" wicket:id="strTelefono" placeholder="10 dígitos">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Empresa <span class="required-mark">*</span></label>
+                            <div class="input-container">
+                                <i class="fas fa-building"></i>
+                                <input type="text" wicket:id="strEmpresa" placeholder="Nombre de la compañía">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="btn-group">
+                    <button type="submit" class="btn-save">
+                        <i class="fas fa-check-circle"></i> Confirmar Registro
+                    </button>
+                    <a wicket:id="btnCancelar" class="btn-cancel">
+                        <i class="fas fa-times"></i> Cancelar
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</wicket:extend>

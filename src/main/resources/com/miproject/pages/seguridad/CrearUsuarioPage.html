@@ -1,0 +1,458 @@
+<html xmlns:wicket="http://wicket.apache.org">
+<wicket:head>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        :root {
+            --morado-oscuro: #4332af;
+            --morado-medio: #725ec3;
+            --morado-claro: #a18bd7;
+            --lavanda: #d0b8eb;
+            --fondo-suave: #f9f7ff;
+            --blanco: #ffffff;
+            --error: #e74c3c;
+            --exito: #2ecc71;
+            --sombra: rgba(0, 0, 0, 0.08);
+        }
+
+        .page {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .content {
+            background: var(--blanco);
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px var(--sombra);
+            border: 1px solid var(--lavanda);
+        }
+        
+        .page-title {
+            color: var(--morado-oscuro);
+            margin-top: 0;
+            margin-bottom: 30px;
+            font-size: 26px;
+            font-weight: 700;
+            text-align: center;
+            border-bottom: 2px solid var(--fondo-suave);
+            padding-bottom: 15px;
+        }
+        
+        .form-row {
+            display: flex;
+            gap: 25px;
+            flex-wrap: wrap;
+            margin-bottom: 10px;
+        }
+        
+        .form-col {
+            flex: 1;
+            min-width: 250px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #555;
+            font-size: 14px;
+        }
+        
+        .form-group label i {
+            margin-right: 8px;
+            color: var(--morado-claro);
+        }
+        
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid var(--lavanda);
+            border-radius: 12px;
+            font-size: 15px;
+            box-sizing: border-box;
+            background: white;
+            transition: all 0.3s ease;
+        }
+        
+        .form-group input:focus, .form-group select:focus {
+            outline: none;
+            border-color: var(--morado-medio);
+            box-shadow: 0 0 0 4px var(--fondo-suave);
+        }
+        
+        input[type="file"] {
+            padding: 10px;
+            cursor: pointer;
+        }
+        
+        .input-wrapper {
+            position: relative;
+        }
+        
+        .input-wrapper input {
+            padding-right: 45px;
+        }
+        
+        .password-toggle {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: var(--morado-medio);
+            transition: color 0.3s;
+        }
+        
+        .password-toggle:hover {
+            color: var(--morado-oscuro);
+        }
+        
+        .btn-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 35px;
+            padding-top: 20px;
+            border-top: 1px solid var(--fondo-suave);
+            flex-wrap: wrap;
+        }
+        
+        .btn-group button, .btn-group a.btn-link {
+            flex: 1;
+            padding: 15px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            text-align: center;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary {
+            background: var(--morado-oscuro);
+            color: white;
+            border: none;
+        }
+        
+        .btn-primary:hover {
+            background: var(--morado-medio);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(67, 50, 175, 0.3);
+        }
+        
+        .btn-secondary {
+            background: var(--fondo-suave);
+            color: var(--morado-oscuro);
+            border: 1px solid var(--lavanda);
+        }
+        
+        .btn-secondary:hover {
+            background: var(--lavanda);
+            color: white;
+        }
+        
+        .mensaje-error {
+            background: #fdf2f2;
+            color: var(--error);
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            text-align: left;
+            border-left: 5px solid var(--error);
+            font-size: 14px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .mensaje-error::before {
+            content: "\f071";
+            font-family: "Font Awesome 6 Free";
+            font-weight: 900;
+            font-size: 16px;
+        }
+        
+        .step-indicator {
+            text-align: center;
+            color: var(--morado-oscuro);
+            margin-bottom: 25px;
+            font-weight: 600;
+            font-size: 16px;
+            background: var(--fondo-suave);
+            padding: 12px 20px;
+            border-radius: 30px;
+            display: inline-block;
+            width: auto;
+            margin-left: auto;
+            margin-right: auto;
+            border: 1px solid var(--lavanda);
+        }
+        
+        .step-indicator i {
+            margin-right: 8px;
+            color: var(--morado-medio);
+        }
+        
+        #lblPassStatus {
+            font-size: 13px;
+            display: block;
+            margin-top: 5px;
+            font-weight: 600;
+        }
+        
+        #lblPassStatus.coinciden {
+            color: var(--exito);
+        }
+        
+        #lblPassStatus.no-coinciden {
+            color: var(--error);
+        }
+        
+        div[wicket\:id="feedback"] ul {
+            list-style-type: none;
+            padding: 0;
+            margin: 0 0 20px 0;
+        }
+        
+        div[wicket\:id="feedback"] li {
+            padding: 12px 20px;
+            margin-bottom: 10px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 14px;
+        }
+        
+        .feedbackPanelSUCCESS {
+            background-color: #e8f8f0;
+            color: var(--exito);
+            border: 1px solid var(--exito);
+        }
+        
+        .feedbackPanelERROR {
+            background-color: #fdf2f2;
+            color: var(--error);
+            border: 1px solid var(--error);
+        }
+        
+        .required-mark {
+            color: var(--error);
+            margin-left: 3px;
+        }
+        
+        @media (max-width: 600px) {
+            .content {
+                padding: 25px;
+            }
+            
+            .btn-group {
+                flex-direction: column;
+            }
+            
+            .btn-group button, .btn-group a {
+                width: 100%;
+            }
+        }
+    </style>
+</wicket:head>
+
+<body>
+<wicket:extend>
+    <div class="page">
+        <div class="content">
+            <h1 class="page-title" wicket:id="titulo">Registro de Usuario</h1>
+
+            <form wicket:id="formGlobal">
+                <div wicket:id="mensajeError" class="mensaje-error"></div>
+                <div wicket:id="feedback"></div>
+
+                <div wicket:id="pasoContainer">
+                    <div wicket:id="pasoContenido"></div>
+                </div>
+
+                <div class="btn-group">
+                    <button type="button" wicket:id="btnAnterior" class="btn-secondary">
+                        <i class="fas fa-arrow-left"></i> Anterior
+                    </button>
+                    
+                    <button type="submit" wicket:id="btnSiguiente" class="btn-primary">
+                        <span wicket:id="label">Siguiente</span> <i class="fas fa-arrow-right"></i>
+                    </button>
+                    
+                    <a wicket:id="btnCancelar" class="btn-secondary btn-link">
+                        <i class="fas fa-times"></i> Cancelar
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <wicket:fragment wicket:id="fragPaso1">
+        <div class="step-indicator">
+            <i class="fas fa-user-plus"></i> Paso 1 de 3: Datos Personales
+        </div>
+        
+        <div class="form-row">
+            <div class="form-col">
+                <div class="form-group">
+                    <label><i class="fas fa-user"></i> Nombre(s) <span class="required-mark">*</span></label>
+                    <input type="text" wicket:id="nombre" placeholder="Ej. Juan">
+                </div>
+            </div>
+            <div class="form-col">
+                <div class="form-group">
+                    <label><i class="fas fa-user"></i> Apellido Paterno <span class="required-mark">*</span></label>
+                    <input type="text" wicket:id="apellidoPaterno" placeholder="Ej. Pérez">
+                </div>
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-col">
+                <div class="form-group">
+                    <label><i class="fas fa-user"></i> Apellido Materno</label>
+                    <input type="text" wicket:id="apellidoMaterno" placeholder="Ej. García">
+                </div>
+            </div>
+            <div class="form-col">
+                <div class="form-group">
+                    <label><i class="fas fa-calendar-alt"></i> Fecha de Nacimiento <span class="required-mark">*</span></label>
+                    <input type="text" wicket:id="fechaNacimiento" placeholder="DD/MM/AAAA">
+                </div>
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-col">
+                <div class="form-group">
+                    <label><i class="fas fa-phone"></i> Teléfono <span class="required-mark">*</span></label>
+                    <input type="text" wicket:id="telefono" placeholder="10 dígitos">
+                </div>
+            </div>
+        </div>
+    </wicket:fragment>
+
+    <wicket:fragment wicket:id="fragPaso2">
+        <div class="step-indicator">
+            <i class="fas fa-lock"></i> Paso 2 de 3: Seguridad
+        </div>
+        
+        <div class="form-row">
+            <div class="form-col">
+                <div class="form-group">
+                    <label><i class="fas fa-envelope"></i> Correo electrónico <span class="required-mark">*</span></label>
+                    <input type="email" wicket:id="correo" placeholder="ejemplo@correo.com">
+                </div>
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-col">
+                <div class="form-group">
+                    <label><i class="fas fa-lock"></i> Contraseña <span class="required-mark">*</span></label>
+                    <div class="input-wrapper">
+                        <input type="password" wicket:id="password" id="pass1" placeholder="Crea una contraseña">
+                        <i class="fas fa-eye password-toggle" onclick="togglePassword('pass1', this)"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="form-col">
+                <div class="form-group">
+                    <label><i class="fas fa-check-circle"></i> Confirmar Contraseña <span class="required-mark">*</span></label>
+                    <div class="input-wrapper">
+                        <input type="password" wicket:id="confirmPassword" id="pass2" placeholder="Repite la contraseña">
+                        <i class="fas fa-eye password-toggle" onclick="togglePassword('pass2', this)"></i>
+                    </div>
+                    <span id="lblPassStatus"></span> 
+                </div>
+            </div>
+        </div>
+    </wicket:fragment>
+
+    <wicket:fragment wicket:id="fragPaso3">
+        <div class="step-indicator">
+            <i class="fas fa-cog"></i> Paso 3 de 3: Configuración de Cuenta
+        </div>
+        <div class="form-row">
+            <div class="form-col">
+                <div class="form-group">
+                    <label><i class="fas fa-id-badge"></i> Perfil de Usuario <span class="required-mark">*</span></label>
+                    <select wicket:id="perfil"></select>
+                </div>
+            </div>
+            <div class="form-col">
+                <div class="form-group">
+                    <label><i class="fas fa-toggle-on"></i> Estado <span class="required-mark">*</span></label>
+                    <select wicket:id="estado"></select>
+                </div>
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="form-col">
+                <div class="form-group">
+                    <label><i class="fas fa-image"></i> Foto de Perfil (Opcional)</label>
+                    <input type="file" wicket:id="imagen" accept="image/*">
+                </div>
+            </div>
+        </div>
+    </wicket:fragment>
+
+<script>
+        function togglePassword(inputId, iconElement) {
+            const passwordInput = document.getElementById(inputId);
+            if (passwordInput) {
+                if (passwordInput.type === 'password') {
+                    passwordInput.type = 'text';
+                    iconElement.classList.remove('fa-eye');
+                    iconElement.classList.add('fa-eye-slash');
+                } else {
+                    passwordInput.type = 'password';
+                    iconElement.classList.remove('fa-eye-slash');
+                    iconElement.classList.add('fa-eye');
+                }
+            }
+        }
+
+        document.addEventListener('keyup', function(event) {
+            
+            // Si el elemento donde se teclea es pass2
+            if (event.target && event.target.id === 'pass2') {
+                const pass1 = document.getElementById('pass1') ? document.getElementById('pass1').value : '';
+                const pass2 = event.target.value;
+                const lblStatus = document.getElementById('lblPassStatus');
+
+                if (lblStatus) {
+                    if (pass2.length > 0) {
+                        if (pass1 === pass2) {
+                            lblStatus.textContent = "✓ Las contraseñas coinciden";
+                            lblStatus.style.cssText = "color: var(--exito); font-size: 13px; display: block; margin-top: 5px; font-weight: 600;";
+                        } else {
+                            lblStatus.textContent = "✗ Las contraseñas no coinciden";
+                            lblStatus.style.cssText = "color: var(--error); font-size: 13px; display: block; margin-top: 5px; font-weight: 600;";
+                        }
+                    } else {
+                        lblStatus.textContent = "";
+                    }
+                }
+            }
+
+            if (event.target && event.target.id === 'pass1') {
+                const pass2El = document.getElementById('pass2');
+                if (pass2El && pass2El.value.length > 0) {
+                    pass2El.dispatchEvent(new Event('keyup', { 'bubbles': true }));
+                }
+            }
+        });
+    </script>
+</wicket:extend>
+</body>
+</html>

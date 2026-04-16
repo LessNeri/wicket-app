@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html xmlns:wicket="http://wicket.apache.org">
+<body>
+    <wicket:extend>
+        <wicket:head>
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+            <style>
+                :root {
+                    --morado-oscuro: #4332af;
+                    --morado-medio: #725ec3;
+                    --morado-claro: #a18bd7;
+                    --lavanda: #d0b8eb;
+                    --fondo-suave: #f9f7ff;
+                    --blanco: #ffffff;
+                    --error: #e74c3c;
+                    --exito: #2ecc71;
+                    --sombra: rgba(0, 0, 0, 0.08);
+                }
+
+                .form-container {
+                    max-width: 500px;
+                    margin: 0 auto;
+                    background: var(--blanco);
+                    padding: 40px;
+                    border-radius: 20px;
+                    box-shadow: 0 10px 30px var(--sombra);
+                    border: 1px solid var(--lavanda);
+                }
+
+                h2 {
+                    color: var(--morado-oscuro) !important;
+                    margin-top: 0;
+                    margin-bottom: 25px;
+                    font-size: 24px;
+                    font-weight: 700;
+                    text-align: center;
+                    border-bottom: 2px solid var(--fondo-suave);
+                    padding-bottom: 15px;
+                }
+
+                p {
+                    color: #666 !important;
+                    font-size: 14px !important;
+                    margin-bottom: 25px !important;
+                    background: var(--fondo-suave);
+                    padding: 12px 15px;
+                    border-radius: 12px;
+                    display: flex;
+                    align-items: center;
+                    gap: 10px;
+                }
+
+                p::before {
+                    content: "\f05a";
+                    font-family: "Font Awesome 6 Free";
+                    font-weight: 900;
+                    color: var(--morado-medio);
+                    font-size: 16px;
+                }
+
+                div[wicket\:id="mensajeError"] {
+                    background: #fdf2f2 !important;
+                    color: var(--error) !important;
+                    padding: 15px !important;
+                    border-radius: 12px !important;
+                    margin-bottom: 20px !important;
+                    border-left: 5px solid var(--error) !important;
+                    font-size: 14px !important;
+                    font-weight: 500 !important;
+                    display: flex !important;
+                    align-items: center !important;
+                    gap: 10px !important;
+                }
+
+                div[wicket\:id="mensajeError"]::before {
+                    content: "\f071";
+                    font-family: "Font Awesome 6 Free";
+                    font-weight: 900;
+                    color: var(--error);
+                    font-size: 16px;
+                }
+
+                .form-group {
+                    margin-bottom: 25px;
+                }
+
+                label {
+                    font-weight: 600 !important;
+                    display: block !important;
+                    margin-bottom: 8px !important;
+                    color: #555 !important;
+                    font-size: 14px !important;
+                }
+
+                .input-container {
+                    position: relative;
+                }
+
+                .input-container i {
+                    position: absolute;
+                    left: 15px;
+                    top: 50%;
+                    transform: translateY(-50%);
+                    color: var(--morado-claro);
+                    z-index: 5;
+                }
+
+                input[type="text"], select {
+                    width: 100% !important;
+                    padding: 12px 15px 12px 45px !important;
+                    border: 2px solid var(--lavanda) !important;
+                    border-radius: 12px !important;
+                    font-size: 15px !important;
+                    transition: all 0.3s ease !important;
+                    box-sizing: border-box !important;
+                    background-color: white !important;
+                }
+
+                select {
+                    cursor: pointer !important;
+                    appearance: none !important;
+                    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%23725ec3' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E") !important;
+                    background-repeat: no-repeat !important;
+                    background-position: calc(100% - 15px) center !important;
+                    padding-right: 40px !important;
+                }
+
+                input[type="text"]:focus, select:focus {
+                    outline: none !important;
+                    border-color: var(--morado-medio) !important;
+                    box-shadow: 0 0 0 4px var(--fondo-suave) !important;
+                }
+
+                .required-mark {
+                    color: var(--error);
+                    margin-left: 3px;
+                }
+
+                .btn-actualizar {
+                    background: var(--morado-oscuro) !important;
+                    color: white !important;
+                    padding: 15px !important;
+                    width: 100% !important;
+                    border: none !important;
+                    border-radius: 12px !important;
+                    font-weight: 600 !important;
+                    cursor: pointer !important;
+                    font-size: 16px !important;
+                    transition: all 0.3s !important;
+                    display: flex !important;
+                    align-items: center !important;
+                    justify-content: center !important;
+                    gap: 10px !important;
+                    margin-bottom: 15px !important;
+                }
+
+                .btn-actualizar:hover {
+                    background: var(--morado-medio) !important;
+                    transform: translateY(-2px) !important;
+                    box-shadow: 0 5px 15px rgba(67, 50, 175, 0.3) !important;
+                }
+
+                .btn-actualizar::before {
+                    content: "\f0c7";
+                    font-family: "Font Awesome 6 Free";
+                    font-weight: 900;
+                }
+
+                .btn-cancelar {
+                    display: block !important;
+                    text-align: center !important;
+                    margin-top: 0 !important;
+                    color: var(--morado-oscuro) !important;
+                    text-decoration: none !important;
+                    background: var(--fondo-suave) !important;
+                    padding: 12px !important;
+                    border-radius: 12px !important;
+                    font-weight: 600 !important;
+                    border: 1px solid var(--lavanda) !important;
+                    transition: all 0.3s !important;
+                }
+
+                .btn-cancelar:hover {
+                    background: var(--lavanda) !important;
+                    color: white !important;
+                }
+
+                .btn-cancelar::before {
+                    content: "\f00d";
+                    font-family: "Font Awesome 6 Free";
+                    font-weight: 900;
+                    margin-right: 8px;
+                }
+
+                @media (max-width: 600px) {
+                    .form-container {
+                        padding: 25px;
+                    }
+                }
+            </style>
+        </wicket:head>
+
+        <div class="form-container">
+            <h2 wicket:id="titulo">Editar Menú Principal</h2>
+            <p>Estás editando un Menú Principal. Solo puedes modificar su nombre y estado.</p>
+            
+            <form wicket:id="formulario">
+                <div wicket:id="mensajeError"></div>
+                
+                <div class="form-group">
+                    <label>Nombre del Menú <span class="required-mark">*</span></label>
+                    <div class="input-container">
+                        <i class="fas fa-folder"></i>
+                        <input type="text" wicket:id="nombre" placeholder="Nombre del menú principal">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Estado</label>
+                    <div class="input-container">
+                        <i class="fas fa-toggle-on"></i>
+                        <select wicket:id="estado"></select>
+                    </div>
+                </div>
+                
+                <button type="submit" wicket:id="btnActualizar" class="btn-actualizar">Guardar Cambios</button>
+                <a href="#" wicket:id="cancelar" class="btn-cancelar">Cancelar</a>
+            </form>
+        </div>
+    </wicket:extend>
+</body>
+</html>

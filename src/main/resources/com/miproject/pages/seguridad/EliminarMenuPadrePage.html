@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html xmlns:wicket="http://wicket.apache.org">
+<body>
+    <wicket:extend>
+        <wicket:head>
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+            <style>
+                :root {
+                    --morado-oscuro: #4332af;
+                    --morado-medio: #725ec3;
+                    --morado-claro: #a18bd7;
+                    --lavanda: #d0b8eb;
+                    --fondo-suave: #f9f7ff;
+                    --blanco: #ffffff;
+                    --error: #e74c3c;
+                    --exito: #2ecc71;
+                    --warning: #f39c12;
+                    --sombra: rgba(0, 0, 0, 0.08);
+                }
+
+                .delete-container {
+                    max-width: 550px;
+                    margin: 40px auto;
+                    background: var(--blanco);
+                    padding: 40px;
+                    border-radius: 20px;
+                    box-shadow: 0 10px 30px var(--sombra);
+                    border: 1px solid var(--lavanda);
+                    text-align: center;
+                }
+
+                .warning-icon {
+                    font-size: 56px;
+                    color: var(--error);
+                    margin-bottom: 20px;
+                    animation: pulse 2s infinite;
+                }
+
+                @keyframes pulse {
+                    0% { transform: scale(1); }
+                    50% { transform: scale(1.05); }
+                    100% { transform: scale(1); }
+                }
+
+                h1 {
+                    color: var(--error) !important;
+                    margin-top: 0 !important;
+                    margin-bottom: 20px !important;
+                    font-size: 28px !important;
+                    font-weight: 700 !important;
+                    border-bottom: 2px solid var(--fondo-suave) !important;
+                    padding-bottom: 15px !important;
+                }
+
+                .nombre-modulo-text {
+                    font-size: 1.1em !important;
+                    color: #666 !important;
+                    margin-bottom: 25px !important;
+                }
+
+                strong {
+                    color: var(--morado-oscuro) !important;
+                    font-size: 1.2em !important;
+                }
+
+                .warning-container {
+                    background: #fdf2f2 !important;
+                    border: 2px solid var(--error) !important;
+                    padding: 20px !important;
+                    border-radius: 12px !important;
+                    margin: 20px 0 !important;
+                    text-align: left !important;
+                    border-left: 5px solid var(--error) !important;
+                }
+
+                .warning-container h3 {
+                    color: var(--error) !important;
+                    margin-top: 0 !important;
+                    margin-bottom: 15px !important;
+                    font-size: 18px !important;
+                    font-weight: 700 !important;
+                    display: flex !important;
+                    align-items: center !important;
+                    gap: 10px !important;
+                }
+
+                .warning-container h3 i {
+                    font-size: 20px !important;
+                }
+
+                .warning-container p {
+                    color: #c0392b !important;
+                    font-size: 0.95em !important;
+                    margin-bottom: 15px !important;
+                    line-height: 1.6 !important;
+                }
+
+                .warning-container strong {
+                    color: var(--error) !important;
+                    font-size: inherit !important;
+                }
+
+                .checkbox-confirmacion {
+                    margin-top: 15px !important;
+                    background: var(--blanco) !important;
+                    padding: 15px !important;
+                    border-radius: 12px !important;
+                    border: 1px dashed var(--error) !important;
+                }
+
+                .checkbox-confirmacion label {
+                    cursor: pointer !important;
+                    color: var(--error) !important;
+                    font-weight: 600 !important;
+                    display: flex !important;
+                    align-items: center !important;
+                    gap: 10px !important;
+                }
+
+                .checkbox-confirmacion input[type="checkbox"] {
+                    transform: scale(1.3) !important;
+                    cursor: pointer !important;
+                    accent-color: var(--error) !important;
+                }
+
+                .error-confirmacion {
+                    color: var(--blanco) !important;
+                    background: var(--error) !important;
+                    padding: 12px 15px !important;
+                    border-radius: 12px !important;
+                    margin-bottom: 20px !important;
+                    font-weight: 600 !important;
+                    font-size: 14px !important;
+                    display: flex !important;
+                    align-items: center !important;
+                    gap: 10px !important;
+                }
+
+                .error-confirmacion::before {
+                    content: "\f071";
+                    font-family: "Font Awesome 6 Free";
+                    font-weight: 900;
+                }
+
+                .btn-group {
+                    margin-top: 30px !important;
+                    padding-top: 20px !important;
+                    border-top: 1px solid var(--fondo-suave) !important;
+                    display: flex !important;
+                    justify-content: center !important;
+                    gap: 15px !important;
+                }
+
+                .btn-eliminar {
+                    background: var(--error) !important;
+                    color: white !important;
+                    padding: 15px 25px !important;
+                    border: none !important;
+                    border-radius: 12px !important;
+                    font-weight: 600 !important;
+                    cursor: pointer !important;
+                    font-size: 16px !important;
+                    transition: all 0.3s !important;
+                    display: flex !important;
+                    align-items: center !important;
+                    justify-content: center !important;
+                    gap: 10px !important;
+                }
+
+                .btn-eliminar:hover {
+                    background: #c0392b !important;
+                    transform: translateY(-2px) !important;
+                    box-shadow: 0 5px 15px rgba(231, 76, 60, 0.3) !important;
+                }
+
+                .btn-eliminar::before {
+                    content: "\f1f8";
+                    font-family: "Font Awesome 6 Free";
+                    font-weight: 900;
+                }
+
+                .btn-cancelar {
+                    background: var(--fondo-suave) !important;
+                    color: var(--morado-oscuro) !important;
+                    padding: 15px 25px !important;
+                    text-decoration: none !important;
+                    border-radius: 12px !important;
+                    font-weight: 600 !important;
+                    font-size: 16px !important;
+                    border: 1px solid var(--lavanda) !important;
+                    transition: all 0.3s !important;
+                    display: flex !important;
+                    align-items: center !important;
+                    justify-content: center !important;
+                    gap: 10px !important;
+                }
+
+                .btn-cancelar:hover {
+                    background: var(--lavanda) !important;
+                    color: white !important;
+                }
+
+                .btn-cancelar::before {
+                    content: "\f00d";
+                    font-family: "Font Awesome 6 Free";
+                    font-weight: 900;
+                }
+
+                @media (max-width: 600px) {
+                    .delete-container {
+                        padding: 25px;
+                        margin: 20px auto;
+                    }
+                    
+                    .btn-group {
+                        flex-direction: column !important;
+                    }
+                }
+            </style>
+        </wicket:head>
+
+        <div class="delete-container">
+            <div class="warning-icon">
+                <i class="fas fa-exclamation-triangle"></i>
+            </div>
+            
+            <h1>Eliminar Menú Principal</h1>
+            
+            <p class="nombre-modulo-text">¿Estás seguro de que deseas eliminar el menú: <strong wicket:id="nombreModulo"></strong>?</p>
+
+            <form wicket:id="formEliminar">
+                <div wicket:id="warningContainer" class="warning-container">
+                    <h3><i class="fas fa-skull-crossbones"></i> ¡PELIGRO DE PÉRDIDA DE DATOS!</h3>
+                    <p>
+                        Este Menú Principal contiene <strong>Submenús asociados</strong>. Si procedes, se eliminará el menú padre y <strong>todos sus submenús serán eliminados permanentemente</strong>. Esta acción no se puede deshacer.
+                    </p>
+                    <div class="checkbox-confirmacion">
+                        <label>
+                            <input type="checkbox" wicket:id="chkConfirmacion">
+                            Sí, entiendo las consecuencias y quiero eliminar el menú y todos sus submenús.
+                        </label>
+                    </div>
+                </div>
+
+                <div wicket:id="lblErrorConfirmacion" class="error-confirmacion"></div>
+
+                <div class="btn-group">
+                    <button type="submit" wicket:id="btnEliminar" class="btn-eliminar">
+                        Eliminar Definitivamente
+                    </button>
+                    <a href="#" wicket:id="cancelar" class="btn-cancelar">
+                        Cancelar
+                    </a>
+                </div>
+            </form>
+        </div>
+    </wicket:extend>
+</body>
+</html>

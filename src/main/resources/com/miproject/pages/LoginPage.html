@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html xmlns:wicket="http://wicket.apache.org">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Iniciar Sesión</title>
+    <script src="https://js.hcaptcha.com/1/api.js" async defer></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        :root {
+            --morado-oscuro: #4332af;
+            --morado-medio: #725ec3;
+            --morado-claro: #a18bd7;
+            --lavanda: #d0b8eb;
+            --fondo-suave: #ffe5ff;
+            --blanco: #ffffff;
+            --error: #e74c3c;
+            --exito: #2ecc71;
+            --sombra: rgba(0, 0, 0, 0.1);
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e9ecf2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .login-container {
+            width: 100%;
+            max-width: 420px;
+            padding: 20px;
+        }
+
+        .login-card {
+            background: var(--blanco);
+            border-radius: 20px;
+            box-shadow: 0 15px 35px var(--sombra);
+            padding: 40px 35px;
+            border: 1px solid var(--lavanda);
+        }
+
+        h1 {
+            color: var(--morado-oscuro);
+            font-size: 28px;
+            font-weight: 600;
+            margin: 0 0 10px 0;
+            text-align: center;
+        }
+
+        .subtitulo {
+            color: #666;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 15px;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #444;
+            font-size: 14px;
+        }
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            font-size: 15px;
+            transition: all 0.3s ease;
+            box-sizing: border-box;
+            background: #fafafa;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--morado-medio);
+            background: white;
+            box-shadow: 0 0 0 4px var(--fondo-suave);
+        }
+
+        .password-toggle {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: var(--morado-claro);
+        }
+
+        .password-toggle:hover {
+            color: var(--morado-medio);
+        }
+
+        .captcha-container {
+            display: flex;
+            justify-content: center;
+            margin: 20px 0;
+        }
+
+        button {
+            width: 100%;
+            padding: 16px;
+            background: var(--morado-oscuro);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px var(--morado-claro);
+        }
+
+        button:hover {
+            background: var(--morado-medio);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px var(--morado-claro);
+        }
+
+        .feedback {
+            margin-bottom: 20px;
+            padding: 12px;
+            border-radius: 8px;
+            background: #f8f8f8;
+            border-left: 4px solid var(--error);
+            color: var(--error);
+            font-size: 14px;
+        }
+
+        .feedback-exito {
+            background: #e8f5e9;
+            border-left-color: var(--exito);
+            color: #2e7d32;
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: 500;
+        }
+
+        .footer {
+            margin-top: 25px;
+            text-align: center;
+            font-size: 13px;
+            color: #999;
+        }
+
+        .footer a {
+            color: var(--morado-medio);
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .footer a:hover {
+            color: var(--morado-oscuro);
+        }
+
+        @media (max-width: 768px) {
+            .login-card {
+                padding: 30px 25px;
+            }
+            h1 {
+                font-size: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="login-container">
+    <div class="login-card">
+        <h1>Bienvenido</h1>
+        <div class="subtitulo">Accede a tu cuenta</div>
+
+        <div wicket:id="feedback" class="feedback"></div>
+        <div wicket:id="mensajeExito" class="feedback-exito"></div>
+
+        <form wicket:id="loginForm">
+            <div class="form-group">
+                <label>Correo electrónico</label>
+                <input type="email" wicket:id="email" placeholder="ejemplo@correo.com">
+            </div>
+
+            <div class="form-group">
+                <label>Contraseña</label>
+                <div class="input-wrapper">
+                    <input type="password" wicket:id="password" placeholder="••••••••">
+                    <i class="fas fa-eye password-toggle" onclick="togglePassword()"></i>
+                </div>
+            </div>
+
+            <div class="captcha-container">
+                <div class="h-captcha" data-sitekey="d68a0486-cdb2-4b46-869c-361675f82c5e" data-callback="onCaptchaVerified"></div>
+            </div>
+
+            <input type="hidden" wicket:id="captchaToken" id="captchaToken"/>
+
+            <button type="submit" wicket:id="btnLogin">Iniciar sesión</button>
+        </form>
+
+        <div class="footer">
+            ¿Problemas para acceder? <a href="#">Contacta al administrador</a>
+        </div>
+    </div>
+</div>
+
+<script>
+    function onCaptchaVerified(token) {
+        document.getElementById('captchaToken').value = token;
+    }
+
+    function togglePassword() {
+        const passwordInput = document.querySelector('[wicket\\:id="password"]');
+        const icon = document.querySelector('.password-toggle');
+        if (passwordInput.type === 'password') {
+            passwordInput.type = 'text';
+            icon.classList.remove('fa-eye');
+            icon.classList.add('fa-eye-slash');
+        } else {
+            passwordInput.type = 'password';
+            icon.classList.remove('fa-eye-slash');
+            icon.classList.add('fa-eye');
+        }
+    }
+</script>
+</body>
+</html>
