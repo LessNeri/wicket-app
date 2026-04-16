@@ -86,7 +86,6 @@ public class BasePage extends WebPage {
                             }
                         };
                         
-                        // === NUEVO: ASIGNAR ÍCONO AL SUBMENÚ ===
                         WebMarkupContainer iconoHijo = new WebMarkupContainer("iconoSubmenu");
                         iconoHijo.add(new AttributeModifier("class", obtenerIcono(submenu.getId(), false)));
                         linkSubmenu.add(iconoHijo);
@@ -139,7 +138,6 @@ public class BasePage extends WebPage {
             case 8:
                 setResponsePage(ClientePage.class, new PageParameters().add("origen", 8));
                 break;
-            // Cuando crees nuevos módulos, solo agrega los "cases" aquí
             default:
                 setResponsePage(HomePage.class); 
                 break;

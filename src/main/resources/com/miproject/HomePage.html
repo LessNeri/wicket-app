@@ -1,100 +1,122 @@
-<!DOCTYPE html>
-<html xmlns:wicket="http://wicket.apache.org">
-<body>
 <wicket:extend>
-
-    <style>
-        .welcome-card { background: #ffffff; padding: 30px; border-radius: 20px; margin-bottom: 30px; box-shadow: 0 5px 20px rgba(0,0,0,0.08); text-align: center; }
-        .welcome-card h1 { color: #4332af; margin-bottom: 10px; }
-        .carousel-container { background: #ffffff; border-radius: 20px; padding: 20px; box-shadow: 0 5px 20px rgba(0,0,0,0.08); }
-        .carousel { position: relative; overflow: hidden; border-radius: 15px; }
-        .carousel-track { display: flex; transition: transform 0.5s ease; }
-        .carousel-slide { min-width: 100%; }
-        .carousel-slide img { width: 100%; height: 400px; object-fit: cover; }
-        .carousel-btn { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,0.5); color: white; border: none; padding: 12px 18px; cursor: pointer; border-radius: 50%; transition: all 0.3s ease; }
-        .carousel-btn:hover { background: rgba(0,0,0,0.8); }
-        .carousel-prev { left: 15px; }
-        .carousel-next { right: 15px; }
-        .upload-section { margin-top: 20px; padding: 20px; background: #ffe5ff; border-radius: 15px; text-align: center; }
-        .btn-subir { background: #4332af; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; margin-top: 10px; }
-    </style>
-
-    <div class="welcome-card">
-        <h1 wicket:id="mensajeBienvenida">Bienvenido al Sistema</h1>
-        <p>Seleccione una opción del menú lateral para comenzar</p>
-    </div>
-
-    <div wicket:id="carouselContainer" class="carousel-container">
-        <div class="carousel">
-            <div class="carousel-track" id="carouselTrack"></div>
-            <button class="carousel-btn carousel-prev" onclick="prevSlide()">‹</button>
-            <button class="carousel-btn carousel-next" onclick="nextSlide()">›</button>
-        </div>
-        <span wicket:id="carouselData" id="carouselData" style="display:none"></span>
-        
-        <div class="upload-section">
-            <form wicket:id="uploadForm" enctype="multipart/form-data">
-                <input type="file" wicket:id="imageUpload" accept="image/*">
-                <br>
-                <button type="submit" wicket:id="btnSubirImagen" class="btn-subir">Subir imagen al carrusel</button>
-            </form>
-        </div>
-        <div wicket:id="feedback" class="feedback"></div>
-    </div>
-
-    <script>
-        let currentIndex = 0;
-        let images = [];
-        let autoInterval;
-
-        function initCarousel() {
-            const dataElem = document.getElementById('carouselData');
-            if (!dataElem) return;
-            try {
-                images = JSON.parse(dataElem.textContent);
-            } catch(e) {
-                images = dataElem.textContent.split(',').filter(img => img.trim());
+    <wicket:head>
+        <style>
+            :root {
+                --morado-oscuro: #4332af;
+                --morado-medio: #725ec3;
+                --morado-claro: #a18bd7;
+                --lavanda: #d0b8eb;
+                --fondo-suave: #f9f7ff;
+                --blanco: #ffffff;
+                --sombra: rgba(0, 0, 0, 0.08);
             }
-            if (images.length === 0) return;
-            const track = document.getElementById('carouselTrack');
-            track.innerHTML = '';
-            images.forEach(img => {
-                const slide = document.createElement('div');
-                slide.className = 'carousel-slide';
-                slide.innerHTML = `<img src="${img}" alt="Imagen">`;
-                track.appendChild(slide);
-            });
-            startAutoSlide();
-        }
-        
-        function goToSlide(index) {
-            if (images.length === 0) return;
-            if (index < 0) index = images.length - 1;
-            if (index >= images.length) index = 0;
-            currentIndex = index;
-            const track = document.getElementById('carouselTrack');
-            track.style.transform = `translateX(-${currentIndex * 100}%)`;
-            resetAutoSlide();
-        }
-        
-        function nextSlide() { goToSlide(currentIndex + 1); }
-        function prevSlide() { goToSlide(currentIndex - 1); }
-        
-        function startAutoSlide() {
-            if (autoInterval) clearInterval(autoInterval);
-            autoInterval = setInterval(nextSlide, 5000);
-        }
-        
-        function resetAutoSlide() {
-            clearInterval(autoInterval);
-            startAutoSlide();
-        }
-        
-        document.addEventListener('DOMContentLoaded', initCarousel);
-        window.initCarousel = initCarousel;
-        window.nextSlide = nextSlide;
-        window.prevSlide = prevSlide;
-    </script>
+
+            /* Contenedor principal que ocupa el alto disponible para centrar */
+            .home-container {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                min-height: 75vh; /* Centra verticalmente en la pantalla */
+                padding: 20px;
+            }
+
+            .welcome-card {
+                background: var(--blanco);
+                padding: 50px 40px;
+                border-radius: 24px;
+                box-shadow: 0 10px 40px var(--sombra);
+                border: 1px solid var(--lavanda);
+                text-align: center;
+                max-width: 600px;
+                width: 100%;
+                transition: transform 0.3s ease;
+            }
+
+            .welcome-card:hover {
+                transform: translateY(-5px);
+            }
+
+            .icon-circle {
+                width: 80px;
+                height: 80px;
+                background: var(--fondo-suave);
+                color: var(--morado-oscuro);
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 35px;
+                margin: 0 auto 25px;
+                border: 2px solid var(--lavanda);
+            }
+
+            .welcome-card h1 {
+                color: var(--morado-oscuro);
+                font-size: 32px;
+                margin-bottom: 15px;
+                font-weight: 700;
+            }
+
+            .welcome-card p {
+                color: #666;
+                font-size: 16px;
+                line-height: 1.6;
+                margin-bottom: 30px;
+            }
+
+            /* Decoración de accesos rápidos para "llenar" el diseño */
+            .quick-steps {
+                display: grid;
+                grid-template-columns: repeat(3, 1fr);
+                gap: 15px;
+                margin-top: 20px;
+            }
+
+            .step-item {
+                padding: 15px;
+                background: var(--fondo-suave);
+                border-radius: 15px;
+                font-size: 13px;
+                color: var(--morado-medio);
+                font-weight: 600;
+            }
+
+            .step-item i {
+                display: block;
+                margin-bottom: 8px;
+                font-size: 18px;
+            }
+        </style>
+    </wicket:head>
+
+    <div class="home-container">
+        <div class="welcome-card">
+            <div class="icon-circle">
+                <i class="fas fa-rocket"></i>
+            </div>
+            
+            <h1 wicket:id="mensajeBienvenida">Bienvenido al Sistema</h1>
+            
+            <p>
+                Has ingresado correctamente al panel administrativo. 
+                Utiliza el menú lateral para gestionar clientes, configurar módulos 
+                y administrar permisos de usuario.
+            </p>
+
+            <div class="quick-steps">
+                <div class="step-item">
+                    <i class="fas fa-search"></i>
+                    Consulta
+                </div>
+                <div class="step-item">
+                    <i class="fas fa-plus-circle"></i>
+                    Registra
+                </div>
+                <div class="step-item">
+                    <i class="fas fa-shield-alt"></i>
+                    Seguro
+                </div>
+            </div>
+        </div>
+    </div>
 </wicket:extend>
-</body>
-</html>

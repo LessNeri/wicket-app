@@ -1,7 +1,6 @@
 package com.miproject.pages;
 
-import java.util.List;
-import org.apache.wicket.markup.html.WebPage; 
+import org.apache.wicket.markup.html.WebPage;
 import com.miproject.services.AuthService;
 import com.miproject.services.JWTService;
 import com.miproject.models.Usuario;
@@ -22,7 +21,7 @@ import org.apache.wicket.validation.validator.StringValidator;
 
 import javax.servlet.http.Cookie;
 
-public class LoginPage extends WebPage { 
+public class LoginPage extends WebPage {
 
     private EmailTextField emailField;
     private PasswordTextField passwordField;
@@ -58,33 +57,32 @@ public class LoginPage extends WebPage {
         form.add(passwordField);
 
         captchaToken = new HiddenField<>("captchaToken", Model.of(""));
+        captchaToken.setMarkupId("captchaTokenField");
         captchaToken.setOutputMarkupId(true);
         form.add(captchaToken);
 
         form.add(new org.apache.wicket.markup.html.WebMarkupContainer("captchaContainer"));
 
-AjaxButton btnLogin = new AjaxButton("btnLogin") {
+        AjaxButton btnLogin = new AjaxButton("btnLogin") {
             @Override
             protected void onSubmit(AjaxRequestTarget target) {
                 String email = emailField.getModelObject();
                 String password = passwordField.getModelObject();
-                // String captcha = captchaToken.getModelObject();  // COMENTADO
+                String captcha = captchaToken.getModelObject();
 
-                // Validar captcha - COMENTADO TEMPORALMENTE
-                // if (!HCaptchaService.verifyCaptcha(captcha)) {
-                //     error("Captcha inválido. Intente nuevamente.");
-                //     target.add(feedback);
-                //     return;
-                // }
+                if (!HCaptchaService.verifyCaptcha(captcha)) {
+                    error("Captcha inválido. Intente nuevamente.");
+                    target.add(feedback);
+                    return;
+                }
 
                 try {
                     Usuario usuario = AuthService.validarLogin(email, password);
-                    
+
                     String token = JWTService.generarToken(
-                        usuario.getId(),
-                        usuario.getStrNombreUsuario(),
-                        usuario.getIdPerfil()
-                    );
+                            usuario.getId(),
+                            usuario.getStrNombreUsuario(),
+                            usuario.getIdPerfil());
 
                     WebResponse response = (WebResponse) getResponse();
                     Cookie cookie = new Cookie("jwt_token", token);
@@ -98,7 +96,7 @@ AjaxButton btnLogin = new AjaxButton("btnLogin") {
                     target.appendJavaScript("setTimeout(function() { window.location.href = '/home'; }, 1500);");
 
                 } catch (Exception e) {
-                    error(e.getMessage()); 
+                    error(e.getMessage());
                     target.add(feedback);
                 }
             }

@@ -19,6 +19,8 @@ public class HCaptchaService {
         try {
             URL url = new URL(VERIFY_URL);
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setConnectTimeout(5000);
+            conn.setReadTimeout(5000);
             conn.setRequestMethod("POST");
             conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
             conn.setDoOutput(true);
@@ -44,7 +46,6 @@ public class HCaptchaService {
                 }
             }
             
-            // La respuesta es un JSON, buscamos "success": true
             return response.toString().contains("\"success\":true");
             
         } catch (Exception e) {
