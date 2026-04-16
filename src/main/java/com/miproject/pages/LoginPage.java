@@ -61,6 +61,13 @@ public class LoginPage extends WebPage {
         captchaToken.setOutputMarkupId(true);
         form.add(captchaToken);
 
+        captchaToken.add(new org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior("change") {
+            @Override
+            protected void onUpdate(AjaxRequestTarget target) {
+            }
+        });
+        form.add(captchaToken);
+
         form.add(new org.apache.wicket.markup.html.WebMarkupContainer("captchaContainer"));
 
         AjaxButton btnLogin = new AjaxButton("btnLogin") {
@@ -70,9 +77,17 @@ public class LoginPage extends WebPage {
                 String password = passwordField.getModelObject();
                 String captcha = captchaToken.getModelObject();
 
-                if (!HCaptchaService.verifyCaptcha(captcha)) {
-                    error("Captcha inválido. Intente nuevamente.");
+                if (captcha == null || captcha.trim().isEmpty()) {
+                    error("Por favor, confirme que es humano resolviendo el captcha.");
                     target.add(feedback);
+                    return;
+                }
+                if (!HCaptchaService.verifyCaptcha(captcha)) {
+                    error("Validación de hCaptcha fallida. Intente nuevamente.");
+                    target.add(feedback);
+                    // Opcional: limpiar el campo para forzar nuevo captcha
+                    captchaToken.setModelObject("");
+                    target.add(captchaToken);
                     return;
                 }
 
@@ -98,6 +113,10 @@ public class LoginPage extends WebPage {
                 } catch (Exception e) {
                     error(e.getMessage());
                     target.add(feedback);
+
+                    captchaToken.setModelObject("");
+                    target.add(captchaToken);
+                    target.appendJavaScript("hcaptcha.reset();");
                 }
             }
         };

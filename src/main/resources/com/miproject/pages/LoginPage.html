@@ -212,10 +212,13 @@
 
 <script>
     function onCaptchaVerified(token) {
-        document.getElementById('captchaTokenField').value = token;
-        
-        var event = new Event('change');
-        document.getElementById('captchaTokenField').dispatchEvent(event);
+        var campoOculto = document.getElementById('captchaTokenField');
+        if (campoOculto) {
+            campoOculto.value = token;
+            
+            var event = new Event('change', { bubbles: true });
+            campoOculto.dispatchEvent(event);
+        }
     }
 
     function togglePassword() {
