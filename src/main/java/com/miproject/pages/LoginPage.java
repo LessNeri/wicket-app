@@ -35,7 +35,10 @@ public class LoginPage extends WebPage {
 
         feedback = new FeedbackPanel("feedback");
         feedback.setOutputMarkupId(true);
+        feedback.setOutputMarkupPlaceholderTag(true);
         add(feedback);
+
+        add(new Label("mensajeBienvenida", "Estás entrando a tu sesión segura."));
 
         mensajeExito = new Label("mensajeExito", "¡Login exitoso! Redirigiendo...");
         mensajeExito.setOutputMarkupId(true);
@@ -66,7 +69,7 @@ public class LoginPage extends WebPage {
             protected void onUpdate(AjaxRequestTarget target) {
             }
         });
-        
+
         form.add(new org.apache.wicket.markup.html.WebMarkupContainer("captchaContainer"));
 
         AjaxButton btnLogin = new AjaxButton("btnLogin") {
@@ -117,6 +120,11 @@ public class LoginPage extends WebPage {
                     target.add(captchaToken);
                     target.appendJavaScript("hcaptcha.reset();");
                 }
+            }
+
+            @Override
+            protected void onError(AjaxRequestTarget target) {
+                target.add(feedback);
             }
         };
 

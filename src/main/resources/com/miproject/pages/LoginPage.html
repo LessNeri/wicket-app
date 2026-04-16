@@ -128,25 +128,36 @@
             box-shadow: 0 8px 20px var(--morado-claro);
         }
 
-        /* FEEDBACK DE ERROR */
+        /* 🔥 FEEDBACK (ERROR) */
         .feedback {
+            display: none;
             margin-bottom: 20px;
-            padding: 12px;
             border-radius: 8px;
+            font-size: 14px;
+            padding: 12px;
             background: #fff5f5;
             border-left: 4px solid var(--error);
             color: var(--error);
-            font-size: 14px;
+            animation: fadeInDown 0.3s ease;
+        }
+
+        /* 👇 SOLO SE MUESTRA CUANDO HAY MENSAJES */
+        .feedback:has(li) {
+            display: block;
         }
 
         .feedback ul {
-            list-style: none;
             margin: 0;
-            padding: 0;
+            padding-left: 20px;
         }
 
-        /* MENSAJE DE ÉXITO Y REDIRECCIÓN */
+        .feedback li {
+            margin-bottom: 5px;
+        }
+
+        /* ✅ MENSAJE DE ÉXITO */
         .feedback-exito {
+            display: none;
             background: #e8f5e9;
             border: 1px solid var(--exito);
             border-left: 5px solid var(--exito);
@@ -156,10 +167,9 @@
             margin-bottom: 25px;
             text-align: center;
             font-weight: 600;
-            font-size: 14px;
-            animation: fadeInDown 0.5s ease-out;
         }
 
+        /* ANIMACIÓN */
         @keyframes fadeInDown {
             from {
                 opacity: 0;
@@ -179,9 +189,15 @@
             color: #999;
         }
 
-        /* Ocultar feedback si está vacío (Wicket behavior) */
-        .feedback:empty {
-            display: none;
+        .mensaje-info {
+            background: #f0f4f8;
+            color: var(--morado-oscuro);
+            padding: 10px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: 13px;
+            border: 1px dashed var(--lavanda);
         }
     </style>
 </head>
@@ -192,7 +208,10 @@
             <h1>Bienvenido</h1>
             <div class="subtitulo">Accede a tu cuenta</div>
 
+            <div wicket:id="mensajeBienvenida" class="mensaje-info"></div>
+
             <div wicket:id="feedback" class="feedback"></div>
+
             <div wicket:id="mensajeExito" class="feedback-exito"></div>
 
             <form wicket:id="loginForm">
@@ -217,9 +236,6 @@
                 <input type="hidden" wicket:id="captchaToken" id="captchaTokenField" />
                 <button type="submit" wicket:id="btnLogin">Iniciar sesión</button>
             </form>
-            <div class="footer">
-                ¿Problemas para acceder? <a href="#">Contacta al administrador</a>
-            </div>
         </div>
     </div>
     <script>
