@@ -11,12 +11,12 @@ public class PermisoDAO {
 
     // Guardar permisos (si existe, actualiza; si no, inserta)
     public boolean guardarPermisos(List<PermisoPerfil> permisos) {
-        String sql = "INSERT INTO permisos_perfil (idModulo, idPerfil, bitAgregar, bitEditar, bitEliminar, bitConsulta) VALUES (?, ?, ?, ?, ?, ?) " +
-                     "ON CONFLICT (idModulo, idPerfil) DO UPDATE SET " +
-                     "bitAgregar = EXCLUDED.bitAgregar, " +
-                     "bitEditar = EXCLUDED.bitEditar, " +
-                     "bitEliminar = EXCLUDED.bitEliminar, " +
-                     "bitConsulta = EXCLUDED.bitConsulta"; 
+        String sql = "INSERT INTO permisos_perfil (idmodulo, idperfil, bitagregar, biteditar, biteliminar, bitconsulta) VALUES (?, ?, ?, ?, ?, ?) " +
+                     "ON CONFLICT (idmodulo, idperfil) DO UPDATE SET " +
+                     "bitagregar = EXCLUDED.bitagregar, " +
+                     "biteditar = EXCLUDED.biteditar, " +
+                     "biteliminar = EXCLUDED.biteliminar, " +
+                     "bitconsulta = EXCLUDED.bitconsulta"; 
 
         try (Connection con = ConexionDB.conectar();
              PreparedStatement ps = con.prepareStatement(sql)) {
@@ -39,10 +39,11 @@ public class PermisoDAO {
             return false;
         }
     }
+    
     // Obtener permisos por perfil
     public List<PermisoPerfil> obtenerPorPerfil(int idPerfil) {
         List<PermisoPerfil> lista = new ArrayList<>();
-        String sql = "SELECT * FROM permisos_perfil WHERE idPerfil = ?";
+        String sql = "SELECT * FROM permisos_perfil WHERE idperfil = ?";
 
         try (Connection con = ConexionDB.conectar();
              PreparedStatement ps = con.prepareStatement(sql)) {
@@ -53,12 +54,12 @@ public class PermisoDAO {
             while (rs.next()) {
                 PermisoPerfil p = new PermisoPerfil();
                 p.setId(rs.getInt("id"));
-                p.setIdModulo(rs.getInt("idModulo"));
-                p.setIdPerfil(rs.getInt("idPerfil"));
-                p.setBitAgregar(rs.getBoolean("bitAgregar"));
-                p.setBitEditar(rs.getBoolean("bitEditar"));
-                p.setBitEliminar(rs.getBoolean("bitEliminar"));
-                p.setBitConsulta(rs.getBoolean("bitConsulta"));
+                p.setIdModulo(rs.getInt("idmodulo"));
+                p.setIdPerfil(rs.getInt("idperfil"));
+                p.setBitAgregar(rs.getBoolean("bitagregar"));
+                p.setBitEditar(rs.getBoolean("biteditar"));
+                p.setBitEliminar(rs.getBoolean("biteliminar"));
+                p.setBitConsulta(rs.getBoolean("bitconsulta"));
                 p.setFechaRegistro(rs.getString("fecha_registro"));
                 lista.add(p);
             }
@@ -68,9 +69,9 @@ public class PermisoDAO {
         return lista;
     }
 
-    // Eliminar permisos de un perfil (útil antes de reinsertar)
+    // Eliminar permisos de un perfil
     public boolean eliminarPorPerfil(int idPerfil) {
-        String sql = "DELETE FROM permisos_perfil WHERE idPerfil = ?";
+        String sql = "DELETE FROM permisos_perfil WHERE idperfil = ?";
 
         try (Connection con = ConexionDB.conectar();
              PreparedStatement ps = con.prepareStatement(sql)) {
@@ -84,31 +85,30 @@ public class PermisoDAO {
         }
     }
 
-    // Obtener permisos de un perfil para un módulo específico
-public PermisoPerfil obtenerPorPerfilYModulo(int idPerfil, int idModulo) {
-    String sql = "SELECT * FROM permisos_perfil WHERE idPerfil = ? AND idModulo = ?";
-    try (Connection con = ConexionDB.conectar();
-         PreparedStatement ps = con.prepareStatement(sql)) {
+    public PermisoPerfil obtenerPorPerfilYModulo(int idPerfil, int idModulo) {
+        String sql = "SELECT * FROM permisos_perfil WHERE idperfil = ? AND idmodulo = ?";
+        try (Connection con = ConexionDB.conectar();
+             PreparedStatement ps = con.prepareStatement(sql)) {
 
-        ps.setInt(1, idPerfil);
-        ps.setInt(2, idModulo);
-        ResultSet rs = ps.executeQuery();
+            ps.setInt(1, idPerfil);
+            ps.setInt(2, idModulo);
+            ResultSet rs = ps.executeQuery();
 
-        if (rs.next()) {
-            PermisoPerfil p = new PermisoPerfil();
-            p.setId(rs.getInt("id"));
-            p.setIdModulo(rs.getInt("idModulo"));
-            p.setIdPerfil(rs.getInt("idPerfil"));
-            p.setBitAgregar(rs.getBoolean("bitAgregar"));
-            p.setBitEditar(rs.getBoolean("bitEditar"));
-            p.setBitEliminar(rs.getBoolean("bitEliminar"));
-            p.setBitConsulta(rs.getBoolean("bitConsulta"));
-            p.setFechaRegistro(rs.getString("fecha_registro"));
-            return p;
+            if (rs.next()) {
+                PermisoPerfil p = new PermisoPerfil();
+                p.setId(rs.getInt("id"));
+                p.setIdModulo(rs.getInt("idmodulo"));
+                p.setIdPerfil(rs.getInt("idperfil"));
+                p.setBitAgregar(rs.getBoolean("bitagregar"));
+                p.setBitEditar(rs.getBoolean("biteditar"));
+                p.setBitEliminar(rs.getBoolean("biteliminar"));
+                p.setBitConsulta(rs.getBoolean("bitconsulta"));
+                p.setFechaRegistro(rs.getString("fecha_registro"));
+                return p;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
-    } catch (SQLException e) {
-        e.printStackTrace();
+        return null;
     }
-    return null;
-}
 }

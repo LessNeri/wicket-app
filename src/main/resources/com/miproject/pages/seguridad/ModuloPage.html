@@ -228,69 +228,6 @@
                 margin: 40px 0;
             }
 
-            /* CONTENEDOR DEL PAGINADO CENTRADO - IGUAL QUE EN CLIENTES */
-            .pagination-container {
-                margin-top: 30px;
-                padding-top: 20px;
-                border-top: 1px solid var(--lavanda);
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                justify-content: center;
-                gap: 15px;
-            }
-            
-            .page-info {
-                background: var(--fondo-suave);
-                padding: 8px 18px;
-                border-radius: 30px;
-                font-size: 13px;
-                font-weight: 500;
-                color: var(--morado-medio);
-                letter-spacing: 0.3px;
-                text-align: center;
-            }
-            
-            .page-info i {
-                margin-right: 5px;
-            }
-            
-            .pagination-controls {
-                display: flex;
-                gap: 12px;
-                justify-content: center;
-            }
-            
-            .btn-pagination {
-                display: inline-flex;
-                align-items: center;
-                gap: 8px;
-                padding: 8px 20px;
-                background: var(--fondo-suave);
-                color: var(--morado-oscuro);
-                border-radius: 30px;
-                text-decoration: none;
-                transition: all 0.2s;
-                cursor: pointer;
-                font-weight: 500;
-                font-size: 13px;
-                border: 1px solid transparent;
-            }
-
-            .btn-pagination:hover {
-                background: var(--lavanda);
-                border-color: var(--morado-claro);
-                transform: translateY(-1px);
-            }
-
-            .btn-pagination[disabled] {
-                opacity: 0.4;
-                cursor: not-allowed;
-                pointer-events: none;
-                background: #e9ecef;
-                color: #6c757d;
-            }
-
             .search-box-padres {
                 margin-bottom: 15px;
                 position: relative;
@@ -431,19 +368,7 @@
                     </table>
                 </div>
 
-                <div class="pagination-container">
-                    <div class="page-info">
-                        <i class="fas fa-info-circle"></i> <span wicket:id="infoPagina"></span>
-                    </div>
-                    <div class="pagination-controls">
-                        <a wicket:id="btnAnterior" class="btn-pagination">
-                            <i class="fas fa-chevron-left"></i> Anterior
-                        </a>
-                        <a wicket:id="btnSiguiente" class="btn-pagination">
-                            Siguiente <i class="fas fa-chevron-right"></i>
-                        </a>
-                    </div>
-                </div>
+                <div wicket:id="paginacionSubmenus"></div>
             </div>
 
             <hr class="divider">
@@ -487,19 +412,7 @@
                     </table>
                 </div>
 
-                <div class="pagination-container">
-                    <div class="page-info">
-                        <i class="fas fa-info-circle"></i> <span wicket:id="infoPaginaPadres"></span>
-                    </div>
-                    <div class="pagination-controls">
-                        <a wicket:id="btnAnteriorPadres" class="btn-pagination">
-                            <i class="fas fa-chevron-left"></i> Anterior
-                        </a>
-                        <a wicket:id="btnSiguientePadres" class="btn-pagination">
-                            Siguiente <i class="fas fa-chevron-right"></i>
-                        </a>
-                    </div>
-                </div>
+                <div wicket:id="paginacionPadres"></div>
             </div>
         </div>
     </div>

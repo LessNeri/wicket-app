@@ -3,6 +3,7 @@ package com.miproject.pages.seguridad;
 import com.miproject.BasePage;
 import com.miproject.BreadcrumbItem;
 import com.miproject.HomePage;
+import com.miproject.components.PaginacionPanel;
 import com.miproject.models.Perfil;
 import com.miproject.models.PermisoPerfil;
 import com.miproject.dao.PerfilDAO;
@@ -21,6 +22,7 @@ import org.apache.wicket.markup.html.panel.FeedbackPanel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
+import com.miproject.components.PaginacionPanel;
 
 import javax.servlet.http.Cookie;
 import java.util.List;
@@ -34,7 +36,9 @@ public class PerfilPage extends BasePage {
     private int tamanoPagina = 5;
     private String filtroBusqueda = "";
     private int totalResultados;
-    
+
+    private PaginacionPanel paginacionPanel;
+
     private static final int ID_MODULO_PERFIL = 1;
     private boolean puedeAgregar;
     private boolean puedeEditar;
@@ -44,52 +48,50 @@ public class PerfilPage extends BasePage {
     public PerfilPage() {
         super();
 
-        cargarDatos();
-
         add(new FeedbackPanel("feedback"));
-        
-// 2. Validar permisos
+
         int idPerfilUsuario = obtenerIdPerfilDesdeToken();
-        
-        // Consultamos qué tipo de perfil tiene este usuario
+        System.out.println("DEBUG CRÍTICO: El Perfil ID que viene del Token es: " + idPerfilUsuario);
+
         Perfil perfilActual = perfilDAO.obtenerPorId(idPerfilUsuario);
         boolean esAdmin = (perfilActual != null && perfilActual.isBitAdministrador());
 
         if (esAdmin) {
-            // SI ES ADMIN: Le damos acceso total, ignorando la tabla de permisos
-            puedeAgregar = true;
-            puedeEditar = true;
-            puedeEliminar = true;
-            puedeConsultar = true;
+            System.out.println("DEBUG: Entrando como ADMINISTRADOR");
+            puedeAgregar = puedeEditar = puedeEliminar = puedeConsultar = true;
         } else {
-            // SI NO ES ADMIN: Verificamos estrictamente sus permisos en la base de datos
+            System.out.println("DEBUG: Entrando como USUARIO REGULAR. Buscando modulo 1...");
             PermisoPerfil permisos = permisoDAO.obtenerPorPerfilYModulo(idPerfilUsuario, ID_MODULO_PERFIL);
 
             if (permisos != null) {
+                System.out.println("DEBUG ÉXITO: Permisos encontrados -> C:" + permisos.isBitConsulta() + " A:"
+                        + permisos.isBitAgregar());
                 puedeAgregar = permisos.isBitAgregar();
                 puedeEditar = permisos.isBitEditar();
                 puedeEliminar = permisos.isBitEliminar();
                 puedeConsultar = permisos.isBitConsulta();
             } else {
-                puedeAgregar = false; puedeEditar = false; puedeEliminar = false; puedeConsultar = false;
+                System.out.println("DEBUG ERROR: El DAO devolvió NULL para Perfil: " + idPerfilUsuario + " y Modulo: "
+                        + ID_MODULO_PERFIL);
+                error("Acceso denegado: No hay permisos configurados en la base de datos.");
+                puedeAgregar = puedeEditar = puedeEliminar = puedeConsultar = false;
             }
         }
-        // 3. AGREGAR TODOS LOS COMPONENTES (Controlando su visibilidad)
-        
-        // Título de la página (Solo se agrega UNA vez)
+
+        if (puedeConsultar) {
+            cargarDatos();
+        }
+
         add(new Label("titulo", "Gestión de Perfiles"));
 
-        // Mensaje de sin permiso (Visible SOLO si no tiene permiso de consultar)
         Label mensajeSinPermiso = new Label("mensajeSinPermiso", "No tienes permiso para ver esta página.");
         mensajeSinPermiso.setVisible(!puedeConsultar);
         add(mensajeSinPermiso);
 
-        // Botón nuevo perfil
         BookmarkablePageLink<Void> nuevoLink = new BookmarkablePageLink<>("nuevoPerfil", CrearPerfilPage.class);
-        nuevoLink.setVisible(puedeAgregar && puedeConsultar); 
+        nuevoLink.setVisible(puedeAgregar && puedeConsultar);
         add(nuevoLink);
 
-        // Buscador
         WebMarkupContainer tablaContainer = new WebMarkupContainer("tablaContainer");
         tablaContainer.setOutputMarkupId(true);
         tablaContainer.setVisible(puedeConsultar);
@@ -104,14 +106,15 @@ public class PerfilPage extends BasePage {
                 filtroBusqueda = busquedaField.getModelObject();
                 paginaActual = 1;
                 cargarDatos();
-                target.add(tablaContainer); 
+                target.add(tablaContainer);
             }
         });
         busquedaForm.add(busquedaField);
         add(busquedaForm);
 
         // 3. TABLA DE PERFILES
-        ListView<Perfil> perfilList = new ListView<Perfil>("perfilList", new PropertyModel<>(this, "perfiles")) {            @Override
+        ListView<Perfil> perfilList = new ListView<Perfil>("perfilList", new PropertyModel<>(this, "perfiles")) {
+            @Override
             protected void populateItem(ListItem<Perfil> item) {
                 Perfil perfil = item.getModelObject();
 
@@ -123,32 +126,37 @@ public class PerfilPage extends BasePage {
                 PageParameters params = new PageParameters();
                 params.add("id", perfil.getId());
 
-                BookmarkablePageLink<Void> editarLink = new BookmarkablePageLink<>("editarPerfil", EditarPerfilPage.class, params);
+                BookmarkablePageLink<Void> editarLink = new BookmarkablePageLink<>("editarPerfil",
+                        EditarPerfilPage.class, params);
                 editarLink.setVisible(puedeEditar);
                 item.add(editarLink);
-                
-                BookmarkablePageLink<Void> eliminarLink = new BookmarkablePageLink<>("eliminarPerfil", EliminarPerfilPage.class, params);
+
+                BookmarkablePageLink<Void> eliminarLink = new BookmarkablePageLink<>("eliminarPerfil",
+                        EliminarPerfilPage.class, params);
                 eliminarLink.setVisible(puedeEliminar);
                 item.add(eliminarLink);
             }
         };
         tablaContainer.add(perfilList);
 
-        // Paginación
-        Label infoPagina = new Label("infoPagina", "");
-        infoPagina.setVisible(puedeConsultar);
-        add(infoPagina);
-
-        Label totalResultadosLabel = new Label("totalResultados", String.valueOf(totalResultados));
-        totalResultadosLabel.setVisible(puedeConsultar);
-        add(totalResultadosLabel);
+        paginacionPanel = new PaginacionPanel("paginacionContainer", paginaActual, totalResultados, tamanoPagina) {
+            @Override
+            public void onPageChange(int nuevaPagina, AjaxRequestTarget target) {
+                paginaActual = nuevaPagina;
+                cargarDatos();
+                target.add(tablaContainer);
+            }
+        };
+        paginacionPanel.setOutputMarkupId(true);
+        paginacionPanel.setVisible(puedeConsultar);
+        add(paginacionPanel);
     }
 
     private void cargarDatos() {
         perfiles = perfilDAO.buscarConFiltros(filtroBusqueda, paginaActual, tamanoPagina);
         totalResultados = perfilDAO.contarConFiltros(filtroBusqueda);
     }
-    
+
     private int obtenerIdPerfilDesdeToken() {
         Cookie[] cookies = ((javax.servlet.http.HttpServletRequest) getRequest().getContainerRequest()).getCookies();
         if (cookies != null) {
@@ -162,9 +170,9 @@ public class PerfilPage extends BasePage {
         return 1;
     }
 
-@Override
+    @Override
     protected List<BasePage.BreadcrumbItem> getBreadcrumbs() {
-        List<BasePage.BreadcrumbItem> list = super.getBreadcrumbs(); 
+        List<BasePage.BreadcrumbItem> list = super.getBreadcrumbs();
         list.add(new BasePage.BreadcrumbItem("Seguridad", PerfilPage.class));
         list.add(new BasePage.BreadcrumbItem("Perfil", PerfilPage.class));
         return list;

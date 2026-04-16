@@ -27,27 +27,31 @@ import javax.servlet.http.Cookie;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import com.miproject.components.PaginacionPanel;
 
 public class ModuloPage extends BasePage {
 
     private ModuloDAO moduloDAO = new ModuloDAO();
     private MenuDAO menuDAO = new MenuDAO();
     private PermisoDAO permisoDAO = new PermisoDAO();
-    
+
     private List<Modulo> modulos;
     private List<Modulo> padres;
-    
+
     private Map<Integer, String> menuMap = new HashMap<>();
     private int paginaActual = 1;
     private int tamanoPagina = 5;
     private String filtroBusqueda = "";
     private int totalResultados;
-    
+
     private static final int ID_MODULO_MODULO = 2;
     private boolean puedeAgregar;
     private boolean puedeEditar;
     private boolean puedeEliminar;
     private boolean puedeConsultar;
+
+    private PaginacionPanel paginacionSubmenus;
+    private PaginacionPanel paginacionPadres;
 
     private int paginaActualPadres = 1;
     private int tamanoPaginaPadres = 5;
@@ -59,7 +63,7 @@ public class ModuloPage extends BasePage {
 
         cargarMenuMap();
         cargarDatos();
-        
+
         int idPerfilUsuario = obtenerIdPerfilDesdeToken();
 
         Perfil perfilActual = new PerfilDAO().obtenerPorId(idPerfilUsuario);
@@ -87,9 +91,10 @@ public class ModuloPage extends BasePage {
         lblMensajeSinPermiso.setVisible(!puedeConsultar);
         add(lblMensajeSinPermiso);
 
-        org.apache.wicket.markup.html.WebMarkupContainer contenidoPrincipal = new org.apache.wicket.markup.html.WebMarkupContainer("contenidoPrincipal");
+        org.apache.wicket.markup.html.WebMarkupContainer contenidoPrincipal = new org.apache.wicket.markup.html.WebMarkupContainer(
+                "contenidoPrincipal");
         contenidoPrincipal.setVisible(puedeConsultar);
-        contenidoPrincipal.setOutputMarkupId(true); 
+        contenidoPrincipal.setOutputMarkupId(true);
         add(contenidoPrincipal);
 
         contenidoPrincipal.add(new org.apache.wicket.markup.html.panel.FeedbackPanel("feedback"));
@@ -97,29 +102,42 @@ public class ModuloPage extends BasePage {
         contenidoPrincipal.add(new Label("titulo", "Gestión de Módulos"));
         contenidoPrincipal.add(new Label("totalResultados", String.valueOf(totalResultados)));
 
-        org.apache.wicket.markup.html.link.BookmarkablePageLink<Void> nuevoLink = 
-            new org.apache.wicket.markup.html.link.BookmarkablePageLink<>("nuevoModulo", CrearModuloPage.class);
+        org.apache.wicket.markup.html.link.BookmarkablePageLink<Void> nuevoLink = new org.apache.wicket.markup.html.link.BookmarkablePageLink<>(
+                "nuevoModulo", CrearModuloPage.class);
         nuevoLink.setVisible(puedeAgregar);
-        contenidoPrincipal.add(nuevoLink);      
-        
-        // 1. Buscador (Queda fuera del contenedor que se actualiza)
+        contenidoPrincipal.add(nuevoLink);
+
         Form<Void> busquedaForm = new Form<>("busquedaForm");
         TextField<String> busquedaField = new TextField<>("busqueda", new Model<>(""));
         busquedaField.add(new AjaxFormComponentUpdatingBehavior("keyup") {
             @Override
             protected void onUpdate(AjaxRequestTarget target) {
                 filtroBusqueda = busquedaField.getModelObject();
-                if (filtroBusqueda == null) filtroBusqueda = "";
+                if (filtroBusqueda == null)
+                    filtroBusqueda = "";
                 paginaActual = 1;
-                cargarDatos(); 
-                // Actualiza solo el contenedor de la tabla
-                target.add(contenidoPrincipal.get("contenedorTablaSubmenus"));
+                cargarDatos();
+
+                WebMarkupContainer contenedor = (WebMarkupContainer) contenidoPrincipal.get("contenedorTablaSubmenus");
+
+                PaginacionPanel nuevaPaginacion = new PaginacionPanel("paginacionSubmenus", paginaActual,
+                        totalResultados, tamanoPagina) {
+                    @Override
+                    public void onPageChange(int nuevaPagina, AjaxRequestTarget target) {
+                        paginaActual = nuevaPagina;
+                        cargarDatos();
+                        target.add(contenidoPrincipal.get("contenedorTablaSubmenus"));
+                    }
+                };
+                nuevaPaginacion.setOutputMarkupId(true);
+
+                contenedor.replace(nuevaPaginacion);
+                target.add(contenedor);
             }
         });
         busquedaForm.add(busquedaField);
         contenidoPrincipal.add(busquedaForm);
 
-        // 2. Contenedor de la tabla Submenús
         WebMarkupContainer contenedorTablaSubmenus = new WebMarkupContainer("contenedorTablaSubmenus");
         contenedorTablaSubmenus.setOutputMarkupId(true);
         contenidoPrincipal.add(contenedorTablaSubmenus);
@@ -137,7 +155,7 @@ public class ModuloPage extends BasePage {
                     nombrePadre = "Submenú de: " + (padre != null ? padre.getStrNombreModulo() : "Desconocido");
                 }
                 item.add(new Label("menuAsignado", nombrePadre));
-                
+
                 String estadoTexto = modulo.getIdEstado() == 1 ? "Activo" : "Inactivo";
                 String badgeClass = modulo.getIdEstado() == 1 ? "badge badge-activo" : "badge badge-inactivo";
                 Label estadoLabel = new Label("estado", estadoTexto);
@@ -147,68 +165,62 @@ public class ModuloPage extends BasePage {
                 PageParameters params = new PageParameters();
                 params.add("id", modulo.getId());
 
-                org.apache.wicket.markup.html.link.BookmarkablePageLink<Void> editarLink = 
-                    new org.apache.wicket.markup.html.link.BookmarkablePageLink<>("editarModulo", EditarModuloPage.class, params);
+                org.apache.wicket.markup.html.link.BookmarkablePageLink<Void> editarLink = new org.apache.wicket.markup.html.link.BookmarkablePageLink<>(
+                        "editarModulo", EditarModuloPage.class, params);
                 editarLink.setVisible(puedeEditar);
                 item.add(editarLink);
-                
-                org.apache.wicket.markup.html.link.BookmarkablePageLink<Void> eliminarLink = 
-                    new org.apache.wicket.markup.html.link.BookmarkablePageLink<>("eliminarModulo", EliminarModuloPage.class, params);
+
+                org.apache.wicket.markup.html.link.BookmarkablePageLink<Void> eliminarLink = new org.apache.wicket.markup.html.link.BookmarkablePageLink<>(
+                        "eliminarModulo", EliminarModuloPage.class, params);
                 eliminarLink.setVisible(puedeEliminar);
                 item.add(eliminarLink);
             }
         });
 
-        org.apache.wicket.model.IModel<String> infoModel = new org.apache.wicket.model.IModel<String>() {
+        // PAGINACIÓN SUBMENÚS
+        paginacionSubmenus = new PaginacionPanel("paginacionSubmenus", paginaActual, totalResultados, tamanoPagina) {
             @Override
-            public String getObject() {
-                if (totalResultados == 0) return "No se encontraron registros";
-                int desde = (paginaActual - 1) * tamanoPagina + 1;
-                int hasta = Math.min(paginaActual * tamanoPagina, totalResultados);
-                return "Mostrando " + desde + " a " + hasta + " de " + totalResultados + " registros";
+            public void onPageChange(int nuevaPagina, AjaxRequestTarget target) {
+                paginaActual = nuevaPagina;
+                cargarDatos();
+                target.add(contenedorTablaSubmenus);
             }
         };
-        contenedorTablaSubmenus.add(new Label("infoPagina", infoModel));
-
-        org.apache.wicket.ajax.markup.html.AjaxLink<Void> btnAnterior = new org.apache.wicket.ajax.markup.html.AjaxLink<Void>("btnAnterior") {
-            @Override
-            public void onClick(AjaxRequestTarget target) {
-                if (paginaActual > 1) {
-                    paginaActual--;
-                    cargarDatos();
-                    target.add(contenedorTablaSubmenus);
-                }
-            }
-        };
-        contenedorTablaSubmenus.add(btnAnterior);
-
-        org.apache.wicket.ajax.markup.html.AjaxLink<Void> btnSiguiente = new org.apache.wicket.ajax.markup.html.AjaxLink<Void>("btnSiguiente") {
-            @Override
-            public void onClick(AjaxRequestTarget target) {
-                int totalPaginas = (int) Math.ceil((double) totalResultados / tamanoPagina);
-                if (paginaActual < totalPaginas) {
-                    paginaActual++;
-                    cargarDatos();
-                    target.add(contenedorTablaSubmenus);
-                }
-            }
-        };
-        contenedorTablaSubmenus.add(btnSiguiente);
-
+        paginacionSubmenus.setOutputMarkupId(true);
+        contenedorTablaSubmenus.add(paginacionSubmenus);
 
         // 1. Buscador Padres (Fuera del contenedor)
         Form<Void> busquedaFormPadres = new Form<>("busquedaFormPadres");
         TextField<String> busquedaFieldPadres = new TextField<>("busquedaPadres", new Model<>(""));
-        
+
         busquedaFieldPadres.add(new AjaxFormComponentUpdatingBehavior("keyup") {
             @Override
             protected void onUpdate(AjaxRequestTarget target) {
                 filtroBusquedaPadres = busquedaFieldPadres.getModelObject();
-                if (filtroBusquedaPadres == null) filtroBusquedaPadres = "";
+                if (filtroBusquedaPadres == null)
+                    filtroBusquedaPadres = "";
                 paginaActualPadres = 1;
-                cargarDatos(); 
-                // Actualiza solo el contenedor de padres
-                target.add(contenidoPrincipal.get("contenedorTablaPadres")); 
+                cargarDatos();
+
+                // 1. Obtenemos el contenedor
+                WebMarkupContainer contenedorPadres = (WebMarkupContainer) contenidoPrincipal
+                        .get("contenedorTablaPadres");
+
+                // 2. Creamos un paginador nuevo con los datos actualizados
+                PaginacionPanel nuevaPaginacionPadres = new PaginacionPanel("paginacionPadres", paginaActualPadres,
+                        totalResultadosPadres, tamanoPaginaPadres) {
+                    @Override
+                    public void onPageChange(int nuevaPagina, AjaxRequestTarget target) {
+                        paginaActualPadres = nuevaPagina;
+                        cargarDatos();
+                        target.add(contenidoPrincipal.get("contenedorTablaPadres"));
+                    }
+                };
+                nuevaPaginacionPadres.setOutputMarkupId(true);
+
+                // 3. Reemplazamos y actualizamos
+                contenedorPadres.replace(nuevaPaginacionPadres);
+                target.add(contenedorPadres);
             }
         });
         busquedaFormPadres.add(busquedaFieldPadres);
@@ -235,53 +247,29 @@ public class ModuloPage extends BasePage {
                 PageParameters params = new PageParameters();
                 params.add("id", padre.getId());
 
-                org.apache.wicket.markup.html.link.BookmarkablePageLink<Void> editarLink = 
-                    new org.apache.wicket.markup.html.link.BookmarkablePageLink<>("editarPadre", EditarMenuPadrePage.class, params);
+                org.apache.wicket.markup.html.link.BookmarkablePageLink<Void> editarLink = new org.apache.wicket.markup.html.link.BookmarkablePageLink<>(
+                        "editarPadre", EditarMenuPadrePage.class, params);
                 editarLink.setVisible(puedeEditar);
                 item.add(editarLink);
-                
-                org.apache.wicket.markup.html.link.BookmarkablePageLink<Void> eliminarLink = 
-                    new org.apache.wicket.markup.html.link.BookmarkablePageLink<>("eliminarPadre", EliminarMenuPadrePage.class, params);
+
+                org.apache.wicket.markup.html.link.BookmarkablePageLink<Void> eliminarLink = new org.apache.wicket.markup.html.link.BookmarkablePageLink<>(
+                        "eliminarPadre", EliminarMenuPadrePage.class, params);
                 eliminarLink.setVisible(puedeEliminar);
                 item.add(eliminarLink);
             }
         });
 
-        org.apache.wicket.model.IModel<String> infoModelPadres = new org.apache.wicket.model.IModel<String>() {
+        paginacionPadres = new PaginacionPanel("paginacionPadres", paginaActualPadres, totalResultadosPadres,
+                tamanoPaginaPadres) {
             @Override
-            public String getObject() {
-                if (totalResultadosPadres == 0) return "No se encontraron registros";
-                int desde = (paginaActualPadres - 1) * tamanoPaginaPadres + 1;
-                int hasta = Math.min(paginaActualPadres * tamanoPaginaPadres, totalResultadosPadres);
-                return "Mostrando " + desde + " a " + hasta + " de " + totalResultadosPadres + " registros";
+            public void onPageChange(int nuevaPagina, AjaxRequestTarget target) {
+                paginaActualPadres = nuevaPagina;
+                cargarDatos();
+                target.add(contenedorTablaPadres);
             }
         };
-        contenedorTablaPadres.add(new Label("infoPaginaPadres", infoModelPadres));
-
-        org.apache.wicket.ajax.markup.html.AjaxLink<Void> btnAnteriorPadres = new org.apache.wicket.ajax.markup.html.AjaxLink<Void>("btnAnteriorPadres") {
-            @Override
-            public void onClick(AjaxRequestTarget target) {
-                if (paginaActualPadres > 1) {
-                    paginaActualPadres--;
-                    cargarDatos();
-                    target.add(contenedorTablaPadres);
-                }
-            }
-        };
-        contenedorTablaPadres.add(btnAnteriorPadres);
-
-        org.apache.wicket.ajax.markup.html.AjaxLink<Void> btnSiguientePadres = new org.apache.wicket.ajax.markup.html.AjaxLink<Void>("btnSiguientePadres") {
-            @Override
-            public void onClick(AjaxRequestTarget target) {
-                int totalPaginas = (int) Math.ceil((double) totalResultadosPadres / tamanoPaginaPadres);
-                if (paginaActualPadres < totalPaginas) {
-                    paginaActualPadres++;
-                    cargarDatos();
-                    target.add(contenedorTablaPadres);
-                }
-            }
-        };
-        contenedorTablaPadres.add(btnSiguientePadres);
+        paginacionPadres.setOutputMarkupId(true);
+        contenedorTablaPadres.add(paginacionPadres);
     }
 
     private void cargarMenuMap() {
@@ -294,14 +282,14 @@ public class ModuloPage extends BasePage {
     private void cargarDatos() {
         modulos = moduloDAO.buscarConFiltros(filtroBusqueda, paginaActual, tamanoPagina);
         totalResultados = moduloDAO.contarConFiltros(filtroBusqueda);
-        
+
         padres = moduloDAO.buscarPadresConFiltros(filtroBusquedaPadres, paginaActualPadres, tamanoPaginaPadres);
-        totalResultadosPadres = moduloDAO.contarPadresConFiltros(filtroBusquedaPadres); 
+        totalResultadosPadres = moduloDAO.contarPadresConFiltros(filtroBusquedaPadres);
     }
-    
+
     private int obtenerIdPerfilDesdeToken() {
         Cookie[] cookies = ((javax.servlet.http.HttpServletRequest) getRequest().getContainerRequest()).getCookies();
-        
+
         if (cookies != null) {
             for (Cookie cookie : cookies) {
                 if ("jwt_token".equals(cookie.getName())) {
@@ -315,8 +303,8 @@ public class ModuloPage extends BasePage {
 
     @Override
     protected List<BasePage.BreadcrumbItem> getBreadcrumbs() {
-        List<BasePage.BreadcrumbItem> list = super.getBreadcrumbs(); 
-        list.add(new BasePage.BreadcrumbItem("Seguridad", ModuloPage.class)); 
+        List<BasePage.BreadcrumbItem> list = super.getBreadcrumbs();
+        list.add(new BasePage.BreadcrumbItem("Seguridad", ModuloPage.class));
         list.add(new BasePage.BreadcrumbItem("Módulo", ModuloPage.class));
         return list;
     }

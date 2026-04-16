@@ -37,9 +37,6 @@ public class PermisoPerfil implements Serializable {
     public boolean isBitConsulta() { return bitConsulta; }
     public void setBitConsulta(boolean bitConsulta) { this.bitConsulta = bitConsulta; }
 
-    public boolean isBitDetalle() { return bitDetalle; }
-    public void setBitDetalle(boolean bitDetalle) { this.bitDetalle = bitDetalle; }
-
     public String getFechaRegistro() { return fechaRegistro; }
     public void setFechaRegistro(String fechaRegistro) { this.fechaRegistro = fechaRegistro; }
 }

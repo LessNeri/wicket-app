@@ -41,63 +41,85 @@ public class BasePage extends WebPage {
         
         Perfil perfilUsuario = perfilDAO.obtenerPorId(idPerfilActual);
         
+        System.out.println("\n=== CONSTRUYENDO MENÚ ===");
+        System.out.println("ID Perfil: " + idPerfilActual);
+        System.out.println("Es Admin: " + (perfilUsuario != null && perfilUsuario.isBitAdministrador()));
+        
         List<PermisoPerfil> permisosLista = permisoDAO.obtenerPorPerfil(idPerfilActual);
         Map<Integer, PermisoPerfil> mapaPermisos = new HashMap<>();
         for (PermisoPerfil p : permisosLista) {
             mapaPermisos.put(p.getIdModulo(), p);
+            System.out.println("  Permiso Módulo " + p.getIdModulo() + " -> Consulta: " + p.isBitConsulta());
         }
         
         ModuloDAO moduloDAO = new ModuloDAO();
 
         List<Modulo> menusPrincipales = moduloDAO.obtenerMenusPrincipales();
+        System.out.println("Menús principales encontrados: " + menusPrincipales.size());
 
         ListView<Modulo> listaMenus = new ListView<Modulo>("listaMenus", menusPrincipales) {
+    @Override
+    protected void populateItem(ListItem<Modulo> itemPadre) {
+        Modulo menuPadre = itemPadre.getModelObject();
+        
+        // Obtener los hijos del menú padre
+        List<Modulo> submenusDB = moduloDAO.obtenerHijosPorPadre(menuPadre.getId());
+        
+        // Filtrar los hijos que son visibles (tienen permiso de consulta)
+        List<Modulo> submenusVisibles = new ArrayList<>();
+        for (Modulo hijo : submenusDB) {
+            if (tienePermiso(mapaPermisos, perfilUsuario, hijo.getId())) {
+                submenusVisibles.add(hijo);
+            }
+        }
+        
+        // El menú padre es visible SI tiene al menos un hijo visible O si el usuario es admin
+        boolean tienePermisoPadre = tienePermiso(mapaPermisos, perfilUsuario, menuPadre.getId());
+        boolean visible = (perfilUsuario != null && perfilUsuario.isBitAdministrador()) 
+                          || tienePermisoPadre 
+                          || !submenusVisibles.isEmpty();
+        
+        System.out.println("  Menú Padre: " + menuPadre.getStrNombreModulo() + " (ID:" + menuPadre.getId() + ") -> Visible: " + visible + " (Hijos visibles: " + submenusVisibles.size() + ")");
+        
+        if (!visible) {
+            itemPadre.setVisible(false);
+            return;
+        }
+
+        WebMarkupContainer iconoPadre = new WebMarkupContainer("iconoMenuPadre");
+        iconoPadre.add(new AttributeModifier("class", obtenerIcono(menuPadre.getId(), true)));
+        itemPadre.add(iconoPadre);
+
+        itemPadre.add(new Label("nombreMenuPadre", menuPadre.getStrNombreModulo()));
+
+        // Usar SOLO los hijos visibles para el submenú
+        ListView<Modulo> listaSubmenus = new ListView<Modulo>("listaSubmenus", submenusVisibles) {
             @Override
-            protected void populateItem(ListItem<Modulo> itemPadre) {
-                Modulo menuPadre = itemPadre.getModelObject();
+            protected void populateItem(ListItem<Modulo> itemHijo) {
+                Modulo submenu = itemHijo.getModelObject();
                 
-                if (!tienePermiso(mapaPermisos, perfilUsuario, menuPadre.getId())) {
-                    itemPadre.setVisible(false);
-                    return;
-                }
+                // Ya sabemos que tiene permiso porque solo incluimos los visibles
+                System.out.println("      Submenú: " + submenu.getStrNombreModulo() + " (ID:" + submenu.getId() + ") -> Visible: true");
 
-                WebMarkupContainer iconoPadre = new WebMarkupContainer("iconoMenuPadre");
-                iconoPadre.add(new AttributeModifier("class", obtenerIcono(menuPadre.getId(), true)));
-                itemPadre.add(iconoPadre);
-
-                itemPadre.add(new Label("nombreMenuPadre", menuPadre.getStrNombreModulo()));
-
-                List<Modulo> submenusDB = moduloDAO.obtenerHijosPorPadre(menuPadre.getId());
-                
-                ListView<Modulo> listaSubmenus = new ListView<Modulo>("listaSubmenus", submenusDB) {
+                Link<Void> linkSubmenu = new Link<Void>("linkSubmenu") {
                     @Override
-                    protected void populateItem(ListItem<Modulo> itemHijo) {
-                        Modulo submenu = itemHijo.getModelObject();
-                        
-                        if (!tienePermiso(mapaPermisos, perfilUsuario, submenu.getId())) {
-                            itemHijo.setVisible(false);
-                            return;
-                        }
-
-                        Link<Void> linkSubmenu = new Link<Void>("linkSubmenu") {
-                            @Override
-                            public void onClick() {
-                                irAPagina(submenu.getId());
-                            }
-                        };
-                        
-                        WebMarkupContainer iconoHijo = new WebMarkupContainer("iconoSubmenu");
-                        iconoHijo.add(new AttributeModifier("class", obtenerIcono(submenu.getId(), false)));
-                        linkSubmenu.add(iconoHijo);
-
-                        linkSubmenu.add(new Label("nombreSubmenu", submenu.getStrNombreModulo()));
-                        itemHijo.add(linkSubmenu);
+                    public void onClick() {
+                        irAPagina(submenu.getId());
                     }
                 };
                 
-                itemPadre.add(listaSubmenus);
+                WebMarkupContainer iconoHijo = new WebMarkupContainer("iconoSubmenu");
+                iconoHijo.add(new AttributeModifier("class", obtenerIcono(submenu.getId(), false)));
+                linkSubmenu.add(iconoHijo);
+
+                linkSubmenu.add(new Label("nombreSubmenu", submenu.getStrNombreModulo()));
+                itemHijo.add(linkSubmenu);
             }
         };
+        
+        itemPadre.add(listaSubmenus);
+    }
+};
         add(listaMenus);
 
         add(new Link<Void>("logout") {
@@ -110,9 +132,12 @@ public class BasePage extends WebPage {
                 setResponsePage(LoginPage.class);
             }
         });
+        
+        System.out.println("===========================\n");
     }
 
     private void irAPagina(int idModuloDB) {
+        System.out.println("Navegando a módulo ID: " + idModuloDB);
         switch(idModuloDB) {
             case 1:
                 setResponsePage(PerfilPage.class);
@@ -193,23 +218,24 @@ public class BasePage extends WebPage {
         return -1;
     }
 
+    // ✅ CORREGIDO: IDs correctos según tu BD
     private String obtenerIcono(int idModuloDB, boolean esPadre) {
         switch(idModuloDB) {
-            case 10: return "fas fa-shield-alt";     
-            case 20: return "fas fa-tachometer-alt";
-            case 30: return "fas fa-cogs"; 
+            case 9: return "fas fa-shield-alt";      // Seguridad (ID=9 en BD)
+            case 10: return "fas fa-tachometer-alt";  // Principal 1
+            case 11: return "fas fa-cogs";            // Principal 2
             
             case 1: return "fas fa-id-badge";    // Perfil
-            case 2: return "fas fa-cubes";       // Modulo
-            case 3: return "fas fa-key";         // Permiso
+            case 2: return "fas fa-cubes";       // Módulo
+            case 3: return "fas fa-key";         // Permisos-Perfil
             case 4: return "fas fa-users";       // Usuario
-            case 5: return "fas fa-user-tie";    // Cliente (Origen 5)
-            case 6: return "fas fa-building";    // Cliente (Origen 6)
-            case 7: return "fas fa-truck";       // Cliente (Origen 7)
-            case 8: return "fas fa-store";       // Cliente (Origen 8)
+            case 5: return "fas fa-user-tie";    // Principal 1.1
+            case 6: return "fas fa-building";    // Principal 1.2
+            case 7: return "fas fa-truck";       // Principal 2.1
+            case 8: return "fas fa-store";       // Principal 2.2
             
             default:
-                return esPadre ? "fas fa-folder" : "fas fa-circle-notch";
+                return esPadre ? "fas fa-folder" : "fas fa-circle";
         }
     }
 

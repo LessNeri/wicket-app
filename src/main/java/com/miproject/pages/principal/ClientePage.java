@@ -2,6 +2,7 @@ package com.miproject.pages.principal;
 
 import com.miproject.BasePage;
 import com.miproject.HomePage;
+import com.miproject.components.PaginacionPanel;
 import com.miproject.dao.ClienteDAO;
 import com.miproject.dao.PerfilDAO;
 import com.miproject.dao.PermisoDAO;
@@ -52,6 +53,8 @@ public class ClientePage extends BasePage {
 
     private String menuPadre;
     private String menuHijo;
+
+    private PaginacionPanel paginacionPanel;
 
     public ClientePage(PageParameters parameters) {
         super();
@@ -193,53 +196,17 @@ public class ClientePage extends BasePage {
 
         tableWrapper.add(clienteList);
 
-        // Agregar la paginación también dentro del contenedor
-        org.apache.wicket.model.IModel<String> infoModel = new org.apache.wicket.model.IModel<String>() {
-            @Override
-            public String getObject() {
-                if (totalResultados == 0) return "No se encontraron registros";
-                int desde = (paginaActual - 1) * tamanoPagina + 1;
-                int hasta = Math.min(paginaActual * tamanoPagina, totalResultados);
-                return "Mostrando " + desde + " a " + hasta + " de " + totalResultados + " registros";
-            }
-        };
-        contenedorTabla.add(new Label("infoPagina", infoModel));
-
-        org.apache.wicket.ajax.markup.html.AjaxLink<Void> btnAnterior = new org.apache.wicket.ajax.markup.html.AjaxLink<Void>("btnAnterior") {
-            @Override
-            public void onClick(AjaxRequestTarget target) {
-                if (paginaActual > 1) {
-                    paginaActual--;
-                    cargarDatos();
-                    target.add(contenedorTabla);
-                }
-            }
-            
-            @Override
-            public boolean isEnabled() {
-                return paginaActual > 1;
-            }
-        };
-        contenedorTabla.add(btnAnterior);
-
-        org.apache.wicket.ajax.markup.html.AjaxLink<Void> btnSiguiente = new org.apache.wicket.ajax.markup.html.AjaxLink<Void>("btnSiguiente") {
-            @Override
-            public void onClick(AjaxRequestTarget target) {
-                int totalPaginas = (int) Math.ceil((double) totalResultados / tamanoPagina);
-                if (paginaActual < totalPaginas) {
-                    paginaActual++;
-                    cargarDatos();
-                    target.add(contenedorTabla);
-                }
-            }
-
-            @Override
-            public boolean isEnabled() {
-                int totalPaginas = (int) Math.ceil((double) totalResultados / tamanoPagina);
-                return paginaActual < totalPaginas;
-            }
-        };
-        contenedorTabla.add(btnSiguiente);
+        // PAGINACIÓN CON COMPONENTE
+paginacionPanel = new PaginacionPanel("paginacionContainer", paginaActual, totalResultados, tamanoPagina) {
+    @Override
+    public void onPageChange(int nuevaPagina, AjaxRequestTarget target) {
+        paginaActual = nuevaPagina;
+        cargarDatos();
+        target.add(contenedorTabla);
+    }
+};
+paginacionPanel.setOutputMarkupId(true);
+contenedorTabla.add(paginacionPanel);
     }
 
     private void cargarDatos() {

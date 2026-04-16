@@ -5,7 +5,12 @@ import com.miproject.BasePage;
 import com.miproject.BreadcrumbItem;
 import com.miproject.HomePage;
 import com.miproject.models.Perfil;
+import com.miproject.models.PermisoPerfil;
+import com.miproject.services.JWTService;
 import com.miproject.dao.PerfilDAO;
+import com.miproject.dao.PermisoDAO;
+
+import org.apache.wicket.RestartResponseException;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.markup.html.basic.Label;
@@ -21,6 +26,8 @@ import org.apache.wicket.validation.validator.StringValidator;
 import java.util.List;
 import java.util.regex.Pattern;
 
+import javax.servlet.http.Cookie;
+
 public class CrearPerfilPage extends BasePage {
 
     private PerfilDAO perfilDAO = new PerfilDAO();
@@ -28,8 +35,26 @@ public class CrearPerfilPage extends BasePage {
     private boolean esAdministrador = false;
     private String mensajeError;
 
+    private PermisoDAO permisoDAO = new PermisoDAO();
+    private static final int ID_MODULO_PERFIL = 1;
+
     public CrearPerfilPage() {
         super();
+
+        int idPerfilUsuario = obtenerIdPerfilDesdeToken();
+        Perfil perfilActual = perfilDAO.obtenerPorId(idPerfilUsuario);
+        boolean esAdmin = (perfilActual != null && perfilActual.isBitAdministrador());
+
+        if (!esAdmin) {
+            PermisoPerfil permisos = permisoDAO.obtenerPorPerfilYModulo(idPerfilUsuario, ID_MODULO_PERFIL);
+            boolean puedeAgregar = (permisos != null && permisos.isBitAgregar());
+            
+            if (!puedeAgregar) {
+                getSession().error("Acceso denegado: No tienes permiso para crear perfiles.");
+                throw new RestartResponseException(PerfilPage.class);
+            }
+        }
+
         add(new Label("titulo", "Crear Nuevo Perfil"));
 
         Form<Void> form = new Form<>("formulario");
@@ -115,6 +140,19 @@ public class CrearPerfilPage extends BasePage {
         form.add(btnCancelar);
 
         add(form);
+    } 
+
+    private int obtenerIdPerfilDesdeToken() {
+        Cookie[] cookies = ((javax.servlet.http.HttpServletRequest) getRequest().getContainerRequest()).getCookies();
+        if (cookies != null) {
+            for (Cookie cookie : cookies) {
+                if ("jwt_token".equals(cookie.getName())) {
+                    Integer idPerfil = JWTService.getPerfilIdFromToken(cookie.getValue());
+                    return idPerfil != null ? idPerfil : 1;
+                }
+            }
+        }
+        return 1;
     }
 
     @Override

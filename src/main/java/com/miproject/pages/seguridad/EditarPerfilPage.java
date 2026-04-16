@@ -5,7 +5,12 @@ import com.miproject.BasePage;
 import com.miproject.BreadcrumbItem;
 import com.miproject.HomePage;
 import com.miproject.models.Perfil;
+import com.miproject.models.PermisoPerfil; // <-- AGREGADO
+import com.miproject.services.JWTService; // <-- AGREGADO
 import com.miproject.dao.PerfilDAO;
+import com.miproject.dao.PermisoDAO; // <-- AGREGADO
+
+import org.apache.wicket.RestartResponseException; // <-- AGREGADO
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.markup.html.basic.Label;
@@ -22,6 +27,8 @@ import org.apache.wicket.validation.validator.StringValidator;
 import java.util.List;
 import java.util.regex.Pattern;
 
+import javax.servlet.http.Cookie;
+
 public class EditarPerfilPage extends BasePage {
 
     private PerfilDAO perfilDAO = new PerfilDAO();
@@ -30,8 +37,26 @@ public class EditarPerfilPage extends BasePage {
     private boolean esAdministrador;
     private String mensajeError;
 
+    private PermisoDAO permisoDAO = new PermisoDAO(); 
+    private static final int ID_MODULO_PERFIL = 1;
+
     public EditarPerfilPage(PageParameters parameters) {
         super();
+
+        int idPerfilUsuario = obtenerIdPerfilDesdeToken();
+        Perfil perfilSesion = perfilDAO.obtenerPorId(idPerfilUsuario); 
+        boolean esAdmin = (perfilSesion != null && perfilSesion.isBitAdministrador());
+
+        if (!esAdmin) {
+            PermisoPerfil permisos = permisoDAO.obtenerPorPerfilYModulo(idPerfilUsuario, ID_MODULO_PERFIL);
+            
+            boolean puedeModificar = (permisos != null && permisos.isBitEditar());
+            
+            if (!puedeModificar) {
+                getSession().error("Acceso denegado: No tienes permiso para editar perfiles.");
+                throw new RestartResponseException(PerfilPage.class);
+            }
+        }
 
         int idPerfil = parameters.get("id").toInt();
         perfilActual = perfilDAO.obtenerPorId(idPerfil);
@@ -55,7 +80,7 @@ public class EditarPerfilPage extends BasePage {
         nombreField.setRequired(true);
         nombreField.add(StringValidator.lengthBetween(3, 30));
         
-        // Validación de caracteres especiales (solo letras, números, espacios y guiones)
+        // Validación de caracteres especiales
         nombreField.add(new IValidator<String>() {
             private final Pattern VALID_PATTERN = Pattern.compile("^[a-zA-Z0-9áéíóúÁÉÍÓÚñÑ\\s-]+$");
             
@@ -131,6 +156,19 @@ public class EditarPerfilPage extends BasePage {
         form.add(btnCancelar);
 
         add(form);
+    } 
+
+    private int obtenerIdPerfilDesdeToken() {
+        Cookie[] cookies = ((javax.servlet.http.HttpServletRequest) getRequest().getContainerRequest()).getCookies();
+        if (cookies != null) {
+            for (Cookie cookie : cookies) {
+                if ("jwt_token".equals(cookie.getName())) {
+                    Integer idPerfil = JWTService.getPerfilIdFromToken(cookie.getValue());
+                    return idPerfil != null ? idPerfil : 1;
+                }
+            }
+        }
+        return 1;
     }
 
     @Override

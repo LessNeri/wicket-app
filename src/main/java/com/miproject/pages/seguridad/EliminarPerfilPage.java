@@ -5,19 +5,44 @@ import com.miproject.BasePage;
 import com.miproject.BreadcrumbItem;
 import com.miproject.HomePage;
 import com.miproject.models.Perfil;
+import com.miproject.models.PermisoPerfil; // <-- AGREGADO
+import com.miproject.services.JWTService; // <-- AGREGADO
 import com.miproject.dao.PerfilDAO;
+import com.miproject.dao.PermisoDAO; // <-- AGREGADO
+
+import org.apache.wicket.RestartResponseException; // <-- AGREGADO
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import java.util.List;
+
+import javax.servlet.http.Cookie;
 
 public class EliminarPerfilPage extends BasePage {
 
     private PerfilDAO perfilDAO = new PerfilDAO();
     private Perfil perfil;
 
+    private PermisoDAO permisoDAO = new PermisoDAO();
+    private static final int ID_MODULO_PERFIL = 1;
+
     public EliminarPerfilPage(PageParameters parameters) {
         super();
+
+        int idPerfilUsuario = obtenerIdPerfilDesdeToken();
+        Perfil perfilSesion = perfilDAO.obtenerPorId(idPerfilUsuario);
+        boolean esAdmin = (perfilSesion != null && perfilSesion.isBitAdministrador());
+
+        if (!esAdmin) {
+            PermisoPerfil permisos = permisoDAO.obtenerPorPerfilYModulo(idPerfilUsuario, ID_MODULO_PERFIL);
+            
+            boolean puedeEliminar = (permisos != null && permisos.isBitEliminar());
+            
+            if (!puedeEliminar) {
+                getSession().error("Acceso denegado: No tienes permiso para eliminar perfiles.");
+                throw new RestartResponseException(PerfilPage.class);
+            }
+        }
 
         int idPerfil = parameters.get("id").toInt();
         perfil = perfilDAO.obtenerPorId(idPerfil);
@@ -70,6 +95,20 @@ public class EliminarPerfilPage extends BasePage {
         });
 
         add(new FeedbackPanel("feedback"));
+    }
+
+
+    private int obtenerIdPerfilDesdeToken() {
+        Cookie[] cookies = ((javax.servlet.http.HttpServletRequest) getRequest().getContainerRequest()).getCookies();
+        if (cookies != null) {
+            for (Cookie cookie : cookies) {
+                if ("jwt_token".equals(cookie.getName())) {
+                    Integer idPerfil = JWTService.getPerfilIdFromToken(cookie.getValue());
+                    return idPerfil != null ? idPerfil : 1;
+                }
+            }
+        }
+        return 1;
     }
     
     @Override
