@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html xmlns:wicket="http://wicket.apache.org">
+
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -137,7 +138,12 @@
             color: var(--error);
             font-size: 14px;
         }
-        .feedback ul { list-style: none; margin: 0; padding: 0; }
+
+        .feedback ul {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
 
         /* MENSAJE DE ÉXITO Y REDIRECCIÓN */
         .feedback-exito {
@@ -155,8 +161,15 @@
         }
 
         @keyframes fadeInDown {
-            from { opacity: 0; transform: translateY(-15px); }
-            to { opacity: 1; transform: translateY(0); }
+            from {
+                opacity: 0;
+                transform: translateY(-15px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .footer {
@@ -165,74 +178,76 @@
             font-size: 13px;
             color: #999;
         }
-        
+
         /* Ocultar feedback si está vacío (Wicket behavior) */
-        .feedback:empty { display: none; }
+        .feedback:empty {
+            display: none;
+        }
     </style>
 </head>
+
 <body>
-<div class="login-container">
-    <div class="login-card">
-        <h1>Bienvenido</h1>
-        <div class="subtitulo">Accede a tu cuenta</div>
+    <div class="login-container">
+        <div class="login-card">
+            <h1>Bienvenido</h1>
+            <div class="subtitulo">Accede a tu cuenta</div>
 
-        <div wicket:id="feedback" class="feedback"></div>
-        <div wicket:id="mensajeExito" class="feedback-exito"></div>
+            <div wicket:id="feedback" class="feedback"></div>
+            <div wicket:id="mensajeExito" class="feedback-exito"></div>
 
-        <form wicket:id="loginForm">
-            <div class="form-group">
-                <label>Correo electrónico</label>
-                <input type="email" wicket:id="email" placeholder="ejemplo@correo.com">
-            </div>
-
-            <div class="form-group">
-                <label>Contraseña</label>
-                <div class="input-wrapper">
-                    <input type="password" wicket:id="password" id="passwordInput" placeholder="••••••••">
-                    <i class="fas fa-eye password-toggle" onclick="togglePassword()"></i>
+            <form wicket:id="loginForm">
+                <div class="form-group">
+                    <label>Correo electrónico</label>
+                    <input type="email" wicket:id="email" placeholder="ejemplo@correo.com">
                 </div>
-            </div>
 
-            <div class="captcha-container">
-                <div class="h-captcha" 
-                     data-sitekey="d68a0486-cdb2-4b46-869c-361675f82c5e" 
-                     data-callback="onCaptchaVerified"></div>
-            </div>
+                <div class="form-group">
+                    <label>Contraseña</label>
+                    <div class="input-wrapper">
+                        <input type="password" wicket:id="password" id="passwordInput" placeholder="••••••••">
+                        <i class="fas fa-eye password-toggle" onclick="togglePassword()"></i>
+                    </div>
+                </div>
 
-            <input type="hidden" wicket:id="captchaToken" id="captchaTokenField"/>
+                <div class="h-captcha" data-sitekey="41aa5d28-2f46-4550-83dc-d78c5efeb558"
+                    data-callback="onCaptchaVerified"></div>
+        </div>
 
-            <button type="submit" wicket:id="btnLogin">Iniciar sesión</button>
+        <input type="hidden" wicket:id="captchaToken" id="captchaTokenField" />
+
+        <button type="submit" wicket:id="btnLogin">Iniciar sesión</button>
         </form>
 
         <div class="footer">
             ¿Problemas para acceder? <a href="#">Contacta al administrador</a>
         </div>
     </div>
-</div>
+    </div>
 
-<script>
-    function onCaptchaVerified(token) {
-        var campoOculto = document.getElementById('captchaTokenField');
-        if (campoOculto) {
-            campoOculto.value = token;
-            
-            var event = new Event('change', { bubbles: true });
-            campoOculto.dispatchEvent(event);
-        }
-    }
+    <script>
+        function onCaptchaVerified(token) {
+            var campoOculto = document.getElementById('captchaTokenField');
+            if (campoOculto) {
+                campoOculto.value = token;
 
-    function togglePassword() {
-        const passwordInput = document.getElementById('passwordInput');
-        const icon = document.querySelector('.password-toggle');
-        
-        if (passwordInput.type === 'password') {
-            passwordInput.type = 'text';
-            icon.classList.replace('fa-eye', 'fa-eye-slash');
-        } else {
-            passwordInput.type = 'password';
-            icon.classList.replace('fa-eye-slash', 'fa-eye');
+                var event = new Event('change', { bubbles: true });
+                campoOculto.dispatchEvent(event);
+            }
         }
-    }
-</script>
+
+        function togglePassword() {
+            const passwordInput = document.getElementById('passwordInput');
+            const icon = document.querySelector('.password-toggle');
+
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                icon.classList.replace('fa-eye', 'fa-eye-slash');
+            } else {
+                passwordInput.type = 'password';
+                icon.classList.replace('fa-eye-slash', 'fa-eye');
+            }
+        }
+    </script>
 </body>
+
 </html>

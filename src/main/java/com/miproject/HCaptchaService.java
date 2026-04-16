@@ -9,7 +9,10 @@ import java.nio.charset.StandardCharsets;
 
 public class HCaptchaService {
     private static final String VERIFY_URL = "https://hcaptcha.com/siteverify";
-    private static final String SECRET_KEY = "ES_65d6.."; // Reemplaza con tu Secret Key
+    
+    private static final String SECRET_KEY = "ES_b6da2606245946a5885d102418951b09";
+    
+    private static final String SITE_KEY = "41aa5d28-2f46-4550-83dc-d78c5efeb558";
     
     public static boolean verifyCaptcha(String captchaResponse) {
         if (captchaResponse == null || captchaResponse.trim().isEmpty()) {
@@ -25,7 +28,9 @@ public class HCaptchaService {
             conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
             conn.setDoOutput(true);
             
-            String postData = "secret=" + SECRET_KEY + "&response=" + captchaResponse;
+            String postData = "secret=" + SECRET_KEY 
+                            + "&response=" + captchaResponse
+                            + "&sitekey=" + SITE_KEY;
             
             try (OutputStream os = conn.getOutputStream()) {
                 byte[] input = postData.getBytes(StandardCharsets.UTF_8);
@@ -33,9 +38,7 @@ public class HCaptchaService {
             }
             
             int responseCode = conn.getResponseCode();
-            if (responseCode != 200) {
-                return false;
-            }
+            if (responseCode != 200) return false;
             
             StringBuilder response = new StringBuilder();
             try (BufferedReader br = new BufferedReader(
