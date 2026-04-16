@@ -209,36 +209,31 @@
                     </div>
                 </div>
 
-                <div class="h-captcha" data-sitekey="41aa5d28-2f46-4550-83dc-d78c5efeb558"
-                    data-callback="onCaptchaVerified"></div>
-        </div>
+                <div wicket:id="captchaContainer" class="captcha-container">
+                    <div class="h-captcha" data-sitekey="41aa5d28-2f46-4550-83dc-d78c5efeb558"
+                        data-callback="onCaptchaVerified"></div>
+                </div>
 
-        <input type="hidden" wicket:id="captchaToken" id="captchaTokenField" />
-
-        <button type="submit" wicket:id="btnLogin">Iniciar sesión</button>
-        </form>
-
-        <div class="footer">
-            ¿Problemas para acceder? <a href="#">Contacta al administrador</a>
+                <input type="hidden" wicket:id="captchaToken" id="captchaTokenField" />
+                <button type="submit" wicket:id="btnLogin">Iniciar sesión</button>
+            </form>
+            <div class="footer">
+                ¿Problemas para acceder? <a href="#">Contacta al administrador</a>
+            </div>
         </div>
     </div>
-    </div>
-
     <script>
         function onCaptchaVerified(token) {
             var campoOculto = document.getElementById('captchaTokenField');
             if (campoOculto) {
                 campoOculto.value = token;
-
                 var event = new Event('change', { bubbles: true });
                 campoOculto.dispatchEvent(event);
             }
         }
-
         function togglePassword() {
             const passwordInput = document.getElementById('passwordInput');
             const icon = document.querySelector('.password-toggle');
-
             if (passwordInput.type === 'password') {
                 passwordInput.type = 'text';
                 icon.classList.replace('fa-eye', 'fa-eye-slash');

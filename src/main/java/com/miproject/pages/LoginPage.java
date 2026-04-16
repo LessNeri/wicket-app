@@ -66,8 +66,7 @@ public class LoginPage extends WebPage {
             protected void onUpdate(AjaxRequestTarget target) {
             }
         });
-        form.add(captchaToken);
-
+        
         form.add(new org.apache.wicket.markup.html.WebMarkupContainer("captchaContainer"));
 
         AjaxButton btnLogin = new AjaxButton("btnLogin") {
