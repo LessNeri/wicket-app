@@ -36,7 +36,7 @@ public class EditarUsuarioPage extends BasePage {
     private String apellidoMaterno;
     private String telefono;
 
-    private String fechaNacimientoStr; 
+    private String fechaNacimientoStr;
     private List<FileUpload> imagenUpload;
 
     private final String regexLetras = "^[a-zA-ZáéíóúÁÉÍÓÚñÑ\\s]+$";
@@ -65,17 +65,19 @@ public class EditarUsuarioPage extends BasePage {
         apellidoPaterno = usuarioActual.getStrApellidoPaterno();
         apellidoMaterno = usuarioActual.getStrApellidoMaterno();
         telefono = usuarioActual.getStrNumeroCelular();
-        fechaNacimientoStr = (usuarioActual.getFechaNacimiento() != null) ? usuarioActual.getFechaNacimiento().toString() : "";
+        fechaNacimientoStr = (usuarioActual.getFechaNacimiento() != null)
+                ? usuarioActual.getFechaNacimiento().toString()
+                : "";
         perfilSeleccionado = perfilDAO.obtenerPorId(usuarioActual.getIdPerfil());
         estado = usuarioActual.getIdEstadoUsuario();
 
-feedback = new FeedbackPanel("mensajeError");
-feedback.setOutputMarkupId(true);
-// Filtro opcional: Solo mostrar Errores y Advertencias aquí
-feedback.setFilter(message -> message.isError() || message.isWarning());
-add(feedback);
+        feedback = new FeedbackPanel("mensajeError");
+        feedback.setOutputMarkupId(true);
+        // Filtro opcional: Solo mostrar Errores y Advertencias aquí
+        feedback.setFilter(message -> message.isError() || message.isWarning());
+        add(feedback);
 
-add(new Label("titulo", "Editar Usuario"));
+        add(new Label("titulo", "Editar Usuario"));
 
         Form<Void> editForm = new Form<>("editForm");
         editForm.setMultiPart(true);
@@ -83,34 +85,38 @@ add(new Label("titulo", "Editar Usuario"));
         add(editForm);
 
         editForm.add(new TextField<String>("nombre", new PropertyModel<>(this, "nombre")) {
-            @Override protected void onComponentTag(ComponentTag tag) {
+            @Override
+            protected void onComponentTag(ComponentTag tag) {
                 super.onComponentTag(tag);
                 tag.put("oninput", jsSoloLetras);
             }
         }.setRequired(true)
-         .add(StringValidator.maximumLength(50))
-         .add(new PatternValidator(regexLetras)));
+                .add(StringValidator.maximumLength(50))
+                .add(new PatternValidator(regexLetras)));
 
         editForm.add(new TextField<String>("apellidoPaterno", new PropertyModel<>(this, "apellidoPaterno")) {
-            @Override protected void onComponentTag(ComponentTag tag) {
+            @Override
+            protected void onComponentTag(ComponentTag tag) {
                 super.onComponentTag(tag);
                 tag.put("oninput", jsSoloLetras);
             }
         }.setRequired(true)
-         .add(StringValidator.maximumLength(50))
-         .add(new PatternValidator(regexLetras)));
+                .add(StringValidator.maximumLength(50))
+                .add(new PatternValidator(regexLetras)));
 
         editForm.add(new TextField<String>("apellidoMaterno", new PropertyModel<>(this, "apellidoMaterno")) {
-            @Override protected void onComponentTag(ComponentTag tag) {
+            @Override
+            protected void onComponentTag(ComponentTag tag) {
                 super.onComponentTag(tag);
                 tag.put("oninput", jsSoloLetras);
             }
         }.setRequired(true)
-         .add(StringValidator.maximumLength(50))
-         .add(new PatternValidator(regexLetras)));
+                .add(StringValidator.maximumLength(50))
+                .add(new PatternValidator(regexLetras)));
 
         editForm.add(new TextField<String>("telefono", new PropertyModel<>(this, "telefono")) {
-            @Override protected void onComponentTag(ComponentTag tag) {
+            @Override
+            protected void onComponentTag(ComponentTag tag) {
                 super.onComponentTag(tag);
                 tag.put("type", "tel");
                 tag.put("maxlength", "10");
@@ -120,7 +126,8 @@ add(new Label("titulo", "Editar Usuario"));
 
         // FECHA: Aquí ocurre la magia para evitar el RuntimeException
         editForm.add(new TextField<String>("fechaNacimiento", new PropertyModel<>(this, "fechaNacimientoStr")) {
-            @Override protected void onComponentTag(ComponentTag tag) {
+            @Override
+            protected void onComponentTag(ComponentTag tag) {
                 super.onComponentTag(tag);
                 tag.put("type", "date"); // Obligamos a que sea date en el navegador
                 tag.put("max", java.time.LocalDate.now().toString());
@@ -128,21 +135,31 @@ add(new Label("titulo", "Editar Usuario"));
         }.setRequired(true));
 
         // SELECTORES (Usando los Renderers correctos)
-        editForm.add(new DropDownChoice<Perfil>("perfil", 
-            new PropertyModel<>(this, "perfilSeleccionado"), 
-            perfilDAO.listarTodos(),
-            new ChoiceRenderer<>("strNombrePerfil", "id")
-        ).setRequired(true));
+        editForm.add(new DropDownChoice<Perfil>("perfil",
+                new PropertyModel<>(this, "perfilSeleccionado"),
+                perfilDAO.listarTodos(),
+                new ChoiceRenderer<>("strNombrePerfil", "id")).setRequired(true));
 
-        editForm.add(new DropDownChoice<Integer>("estado", 
-            new PropertyModel<>(this, "estado"), 
-            Arrays.asList(1, 0),
-            new IChoiceRenderer<Integer>() {
-                @Override public Object getDisplayValue(Integer object) { return (object == 1) ? "Activo" : "Inactivo"; }
-                @Override public String getIdValue(Integer object, int index) { return object.toString(); }
-                @Override public Integer getObject(String id, org.apache.wicket.model.IModel<? extends List<? extends Integer>> choices) { return Integer.valueOf(id); }
-            }
-        ).setRequired(true));
+        editForm.add(new DropDownChoice<Integer>("estado",
+                new PropertyModel<>(this, "estado"),
+                Arrays.asList(1, 0),
+                new IChoiceRenderer<Integer>() {
+                    @Override
+                    public Object getDisplayValue(Integer object) {
+                        return (object == 1) ? "Activo" : "Inactivo";
+                    }
+
+                    @Override
+                    public String getIdValue(Integer object, int index) {
+                        return object.toString();
+                    }
+
+                    @Override
+                    public Integer getObject(String id,
+                            org.apache.wicket.model.IModel<? extends List<? extends Integer>> choices) {
+                        return Integer.valueOf(id);
+                    }
+                }).setRequired(true));
 
         editForm.add(new FileUploadField("imagen", new PropertyModel<>(this, "imagenUpload")));
 
@@ -151,14 +168,18 @@ add(new Label("titulo", "Editar Usuario"));
             protected void onSubmit(AjaxRequestTarget target) {
                 actualizarUsuario(target);
             }
-@Override
-protected void onError(AjaxRequestTarget target) {
-    target.add(feedback);
-}
+
+            @Override
+            protected void onError(AjaxRequestTarget target) {
+                target.add(feedback);
+            }
         });
 
         editForm.add(new org.apache.wicket.markup.html.link.Link<Void>("btnCancelar") {
-            @Override public void onClick() { setResponsePage(UsuarioPage.class); }
+            @Override
+            public void onClick() {
+                setResponsePage(UsuarioPage.class);
+            }
         });
     }
 
@@ -168,7 +189,7 @@ protected void onError(AjaxRequestTarget target) {
             usuarioActual.setStrApellidoPaterno(apellidoPaterno);
             usuarioActual.setStrApellidoMaterno(apellidoMaterno);
             usuarioActual.setStrNumeroCelular(telefono);
-            
+
             if (fechaNacimientoStr != null && !fechaNacimientoStr.isEmpty()) {
                 usuarioActual.setFechaNacimiento(java.sql.Date.valueOf(fechaNacimientoStr));
             }
@@ -179,19 +200,39 @@ protected void onError(AjaxRequestTarget target) {
             usuarioActual.setIdEstadoUsuario(estado);
 
             // Imagen
-if (imagenUpload != null && !imagenUpload.isEmpty()) {
-    FileUpload archivo = imagenUpload.get(0);
-    
-    byte[] bytesImagen = archivo.getBytes();
-    
-    String base64Texto = Base64.getEncoder().encodeToString(bytesImagen);
-    
-    String mimeType = archivo.getContentType();
-    
-    String base64Completo = "data:" + mimeType + ";base64," + base64Texto;
-    
-    usuarioActual.setStrImagenUrl(base64Completo);
-}
+            if (imagenUpload != null && !imagenUpload.isEmpty()) {
+                FileUpload archivo = imagenUpload.get(0);
+
+                // ===== INICIO DE VALIDACIÓN DE IMAGEN =====
+                String contentType = archivo.getContentType();
+                if (contentType == null ||
+                        (!contentType.equals("image/jpeg") &&
+                                !contentType.equals("image/png") &&
+                                !contentType.equals("image/gif"))) {
+                    error("ERROR: El archivo debe ser una imagen (JPEG, PNG o GIF).");
+                    target.add(feedback);
+                    return;
+                }
+
+                String fileName = archivo.getClientFileName();
+                if (fileName != null && !fileName.isEmpty()) {
+                    String extension = fileName.substring(fileName.lastIndexOf(".") + 1).toLowerCase();
+                    if (!extension.equals("jpg") && !extension.equals("jpeg") &&
+                            !extension.equals("png") && !extension.equals("gif")) {
+                        error("ERROR: La extensión del archivo debe ser .jpg, .jpeg, .png o .gif");
+                        target.add(feedback);
+                        return;
+                    }
+                }
+                
+                byte[] bytesImagen = archivo.getBytes();
+
+                if (bytesImagen != null && bytesImagen.length > 0) {
+                    String base64Texto = Base64.getEncoder().encodeToString(bytesImagen);
+                    String base64Completo = "data:" + contentType + ";base64," + base64Texto;
+                    usuarioActual.setStrImagenUrl(base64Completo);
+                }
+            }
 
             if (usuarioDAO.actualizar(usuarioActual)) {
                 getSession().success("¡Usuario actualizado!");
@@ -200,16 +241,16 @@ if (imagenUpload != null && !imagenUpload.isEmpty()) {
                 throw new Exception("Error al guardar en base de datos.");
             }
 
-} catch (Exception e) {
-    error("Error: " + e.getMessage()); 
-    target.add(feedback);
-}
+        } catch (Exception e) {
+            error("Error: " + e.getMessage());
+            target.add(feedback);
+        }
     }
 
     @Override
     protected List<BreadcrumbItem> getBreadcrumbs() {
         List<BreadcrumbItem> list = super.getBreadcrumbs();
-        list.add(new BreadcrumbItem("Seguridad", HomePage.class)); 
+        list.add(new BreadcrumbItem("Seguridad", HomePage.class));
         list.add(new BreadcrumbItem("Usuario", UsuarioPage.class));
         list.add(new BreadcrumbItem("Editar Usuario", EditarUsuarioPage.class));
         return list;

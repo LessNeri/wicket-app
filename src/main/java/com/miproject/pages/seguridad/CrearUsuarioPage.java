@@ -399,21 +399,54 @@ public class CrearUsuarioPage extends BasePage {
             if (imagenUpload != null && !imagenUpload.isEmpty()) {
                 FileUpload archivoSeleccionado = imagenUpload.get(0);
 
-                try {
-                    byte[] bytesImagen = archivoSeleccionado.getBytes();
-
-                    String base64Texto = Base64.getEncoder().encodeToString(bytesImagen);
-
-                    String mimeType = archivoSeleccionado.getContentType();
-
-                    String base64Completo = "data:" + mimeType + ";base64," + base64Texto;
-                    nuevoUsuario.setStrImagenUrl(base64Completo);
-
-                } catch (Exception e) {
-                    mensajeError.setDefaultModelObject("Error al convertir la imagen: " + e.getMessage());
+                // ===== INICIO DE VALIDACIÓN DE IMAGEN =====
+                String contentType = archivoSeleccionado.getContentType();
+                if (contentType == null ||
+                        (!contentType.equals("image/jpeg") &&
+                                !contentType.equals("image/png") &&
+                                !contentType.equals("image/gif"))) {
+                    mensajeError.setDefaultModelObject("ERROR: El archivo debe ser una imagen (JPEG, PNG o GIF).");
                     mensajeError.setVisible(true);
                     target.add(mensajeError);
                     return;
+                }
+
+                String fileName = archivoSeleccionado.getClientFileName();
+                if (fileName != null && !fileName.isEmpty()) {
+                    String extension = fileName.substring(fileName.lastIndexOf(".") + 1).toLowerCase();
+                    if (!extension.equals("jpg") && !extension.equals("jpeg") &&
+                            !extension.equals("png") && !extension.equals("gif")) {
+                        mensajeError.setDefaultModelObject(
+                                "ERROR: La extensión del archivo debe ser .jpg, .jpeg, .png o .gif");
+                        mensajeError.setVisible(true);
+                        target.add(mensajeError);
+                        return;
+                    }
+                }
+                // ===== FIN DE VALIDACIÓN DE IMAGEN =====
+
+                try {
+                    byte[] bytesImagen = archivoSeleccionado.getBytes();
+
+                    if (bytesImagen != null && bytesImagen.length > 0) {
+                        String base64Texto = Base64.getEncoder().encodeToString(bytesImagen);
+                        String base64Completo = "data:" + contentType + ";base64," + base64Texto;
+                        nuevoUsuario.setStrImagenUrl(base64Completo);
+                    } else {
+                        // Si el archivo está vacío, usar avatar por defecto
+                        String inicial = nombre.substring(0, 1).toUpperCase();
+                        String colorHex = generarColorAleatorio();
+                        String urlAvatarGenerado = "https://ui-avatars.com/api/?name=" + inicial + "&background="
+                                + colorHex + "&color=fff";
+                        nuevoUsuario.setStrImagenUrl(urlAvatarGenerado);
+                    }
+
+                } catch (Exception e) {
+                    String inicial = nombre.substring(0, 1).toUpperCase();
+                    String colorHex = generarColorAleatorio();
+                    String urlAvatarGenerado = "https://ui-avatars.com/api/?name=" + inicial + "&background=" + colorHex
+                            + "&color=fff";
+                    nuevoUsuario.setStrImagenUrl(urlAvatarGenerado);
                 }
             } else {
                 String inicial = nombre.substring(0, 1).toUpperCase();
